@@ -6,421 +6,511 @@
 <title>Les couches d'un site web, expliquées pas à pas</title>
 <style>
   :root{
-    --bg:#f7f5f0; --ink:#1d1d1f; --muted:#5b5b63; --card:#fff; --line:#e3dfd6;
-    --front:#2f6fdf; --front-bg:#e8f0fd;
-    --back:#d9771f; --back-bg:#fdf0e3;
-    --infra:#4b8f5a; --infra-bg:#e7f3ea;
-    --none:#b9b6ae;
+    --bg:#fbf8f2; --ink:#1f1d1a; --muted:#625d55; --card:#fff; --line:#e7e1d5;
+    --salle:#2f6fdf; --salle-bg:#e9f0fd;
+    --cuisine:#d06a12; --cuisine-bg:#fdefe1;
+    --bat:#3f8a53; --bat-bg:#e6f3e9;
+    --ok:#3f8a53; --ko:#c2412f;
   }
   *{box-sizing:border-box}
-  body{margin:0;font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
-  main{max-width:980px;margin:0 auto;padding:32px 20px 80px}
-  h1{font-size:2rem;line-height:1.2;margin:0 0 8px}
-  h2{font-size:1.45rem;margin:56px 0 6px;display:flex;gap:12px;align-items:center}
-  h2 .num{flex:none;width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:1rem}
-  h3{margin:0 0 6px;font-size:1.1rem}
-  p.lead{color:var(--muted);margin:0 0 8px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:16px}
-  code{background:#efece5;border-radius:4px;padding:1px 5px;font-size:.92em}
-  .pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.8rem;font-weight:600}
-  .p-front{background:var(--front-bg);color:var(--front)}
-  .p-back{background:var(--back-bg);color:var(--back)}
-  .p-infra{background:var(--infra-bg);color:var(--infra)}
-
-  /* Sommaire */
-  nav.toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
-  nav.toc a{background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 14px;text-decoration:none;color:var(--ink);font-size:.9rem}
-  nav.toc a:hover{border-color:var(--ink)}
-
-  /* Section 1 : le trajet */
-  .journey{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:16px}
-  .jstep{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px;text-align:center;cursor:pointer;font-size:.85rem;transition:.2s}
-  .jstep .ico{font-size:1.6rem;display:block}
-  .jstep.on{border-color:var(--ink);transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.08)}
-  .jdetail{margin-top:12px;min-height:110px}
-  .jnav{display:flex;gap:8px;margin-top:12px}
-  button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--ink);background:var(--ink);color:#fff;padding:8px 16px}
+  html,body{margin:0;max-width:100%;overflow-x:hidden}
+  body{font:17px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);-webkit-text-size-adjust:100%}
+  main{max-width:860px;margin:0 auto;padding:24px 16px 80px}
+  img,svg{max-width:100%}
+  p,li,h1,h2,h3,div,span,button{overflow-wrap:anywhere}
+  h1{font-size:1.9rem;line-height:1.2;margin:8px 0 12px}
+  h2{font-size:1.4rem;line-height:1.3;margin:0 0 8px}
+  h3{font-size:1.08rem;margin:0 0 4px}
+  p{margin:0 0 12px}
+  .muted{color:var(--muted)}
+  .chap{margin-top:56px;scroll-margin-top:12px}
+  .chapnum{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:14px}
+  .grid{display:grid;gap:12px;grid-template-columns:1fr}
+  @media (min-width:640px){
+    .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  @media (min-width:820px){ .g4{grid-template-columns:repeat(4,minmax(0,1fr))} }
+  code{background:#f0ebe1;border-radius:4px;padding:1px 5px;font-size:.9em}
+  .big{font-size:2.2rem;line-height:1}
+  .tag{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.78rem;font-weight:700}
+  .t-salle{background:var(--salle-bg);color:var(--salle)}
+  .t-cuisine{background:var(--cuisine-bg);color:var(--cuisine)}
+  .t-bat{background:var(--bat-bg);color:var(--bat)}
+  .salle{background:var(--salle-bg);border-color:#cfdcf7}
+  .cuisine{background:var(--cuisine-bg);border-color:#f3d7bb}
+  .bat{background:var(--bat-bg);border-color:#cde5d3}
+  .key{background:#fff7dc;border:1px solid #f0dfa3;border-radius:12px;padding:12px 14px;margin-top:14px}
+  .key b{display:block;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:#8a6d12}
+  button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--ink);background:var(--ink);color:#fff;padding:9px 16px;max-width:100%}
   button.ghost{background:#fff;color:var(--ink)}
   button:disabled{opacity:.35;cursor:default}
+  .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 
-  /* Section 2 : la pile */
-  .stackwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px;margin-top:16px;align-items:start}
-  .zone-label{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:12px 0 4px}
-  .layer{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border-radius:10px;padding:10px 12px;margin:5px 0;border:2px solid transparent;color:var(--ink);transition:.15s}
-  .layer .code{font-weight:700;font-size:.8rem;width:28px;flex:none}
-  .layer .nm{font-weight:600}
-  .layer .ex{margin-left:auto;font-size:.8rem;color:var(--muted);text-align:right}
-  .layer.front{background:var(--front-bg)} .layer.front .code{color:var(--front)}
-  .layer.back{background:var(--back-bg)}  .layer.back .code{color:var(--back)}
-  .layer.infra{background:var(--infra-bg)}.layer.infra .code{color:var(--infra)}
-  .layer.on{border-color:var(--ink)}
-  .wire{text-align:center;font-size:.85rem;color:var(--muted);padding:6px 0;border-top:2px dashed var(--line);border-bottom:2px dashed var(--line);margin:10px 0}
-  .detail{position:sticky;top:16px}
-  .detail .q{font-size:1.15rem;font-weight:700;margin:6px 0 10px}
-  .analogy{background:#faf7f0;border-left:4px solid #c9b98f;padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
-  .analogy b{display:block;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:#8a7a4c}
-  .ifnot{font-size:.95rem;color:var(--muted)}
-  .exlist{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-  .exlist span{background:#efece5;border-radius:6px;padding:2px 8px;font-size:.85rem}
+  /* Sommaire */
+  .toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+  .toc a{background:#fff;border:1px solid var(--line);border-radius:99px;padding:5px 12px;text-decoration:none;color:var(--ink);font-size:.85rem}
 
-  /* Section 3 : les piles */
-  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
-  .tabs button{background:#fff;color:var(--ink);border-color:var(--line)}
-  .tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-  .presetgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;margin-top:16px}
-  .prow{display:flex;gap:10px;align-items:center;border-radius:10px;padding:8px 12px;margin:4px 0;font-size:.92rem}
-  .prow .code{font-weight:700;font-size:.78rem;width:28px;flex:none}
-  .prow .lname{width:150px;flex:none;color:var(--muted)}
-  .prow .val{font-weight:600}
-  .prow.front{background:var(--front-bg)} .prow.back{background:var(--back-bg)} .prow.infra{background:var(--infra-bg)}
-  .prow.absent{background:repeating-linear-gradient(45deg,#f1efea,#f1efea 6px,#e8e5de 6px,#e8e5de 12px);color:var(--none)}
-  .prow.absent .val{font-weight:400;font-style:italic}
-  .prow.managed .val::after{content:" · géré par la plateforme";font-weight:400;font-size:.8rem;color:var(--muted)}
-  .who{font-size:.85rem;margin-top:10px;color:var(--muted)}
+  /* Le restaurant (schéma d'ouverture) */
+  .resto{display:grid;gap:0;border-radius:16px;overflow:hidden;border:1px solid var(--line);margin-top:14px}
+  .resto > div{padding:14px 16px}
+  .resto .zt{font-weight:800;font-size:1.05rem}
+  .resto .zw{font-size:.92rem}
 
-  /* Section 4 : les 4 mots */
-  .words{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
-  .word{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
-  .word .big{font-size:2rem}
-  .word .test{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
-  .scale{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:.85rem;color:var(--muted)}
-  .scale .bar{flex:1;height:8px;border-radius:99px;background:linear-gradient(90deg,#cfd8e8,#1d1d1f)}
+  /* Trajet */
+  .steps{display:flex;gap:6px;flex-wrap:wrap}
+  .steps button{background:#fff;color:var(--ink);border-color:var(--line);padding:6px 10px;font-size:.85rem}
+  .steps button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .duo{display:grid;gap:10px;grid-template-columns:1fr;margin-top:12px}
+  @media (min-width:640px){.duo{grid-template-columns:1fr 1fr}}
+  .duo > div{border-radius:12px;padding:12px 14px;border:1px solid var(--line)}
+  .duo .lbl{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .progress{height:6px;background:#eee7da;border-radius:99px;margin-top:14px;overflow:hidden}
+  .progress i{display:block;height:100%;background:var(--ink);width:0;transition:width .3s}
 
-  /* Section 5 : architectures */
-  .archs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
-  .arch{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;font-size:.95rem}
-  .flow{font-family:ui-monospace,Menlo,monospace;font-size:.78rem;background:#f4f2ec;border-radius:8px;padding:8px;margin:8px 0;white-space:pre;overflow-x:auto}
+  /* Démo HTML / CSS / JS */
+  .toggles{display:flex;flex-wrap:wrap;gap:8px}
+  .toggles label{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:600}
+  .stage{margin-top:14px;border:2px dashed #d9d1c2;border-radius:14px;padding:16px;background:#fff;min-height:170px}
+  .stage-cap{font-size:.85rem;color:var(--muted);margin-top:10px;min-height:44px}
+  /* état « CSS activé » */
+  .demo.css .menu{font-family:Georgia,serif;background:linear-gradient(135deg,#fff4e6,#ffe1c4);border-radius:16px;padding:18px;box-shadow:0 8px 20px rgba(208,106,18,.18);max-width:340px}
+  .demo.css .menu h4{font-size:1.4rem;margin:0 0 4px;color:#a24d07}
+  .demo.css .menu p{color:#6b4a2b}
+  .demo.css .menu button{background:#d06a12;border:none;border-radius:99px;padding:10px 18px;color:#fff;font-weight:700}
+  /* état « sans CSS » : rendu brut du navigateur */
+  .demo:not(.css) .menu{font-family:"Times New Roman",serif}
+  .demo:not(.css) .menu h4{margin:0;font-size:1.2rem}
+  .demo:not(.css) .menu button{all:revert;font-family:inherit}
+  .demo .msg{margin-top:10px;font-weight:700;color:var(--ok)}
 
-  /* Section 6 : quiz */
-  .quiz .item{font-size:1.4rem;font-weight:700;margin:6px 0 2px}
-  .quiz .hint{color:var(--muted);font-size:.9rem}
-  .answers{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-  .answers button{background:#fff;color:var(--ink);border-color:var(--line)}
-  .answers button.good{background:var(--infra);border-color:var(--infra);color:#fff}
-  .answers button.bad{background:#c94a3a;border-color:#c94a3a;color:#fff}
-  .feedback{margin-top:12px;min-height:52px}
-  .score{float:right;font-size:.9rem;color:var(--muted)}
+  /* Cartes couches */
+  .layer{border-radius:14px;padding:14px;border:1px solid var(--line)}
+  .layer .eq{font-size:.88rem;color:var(--muted);margin-top:6px}
+  .layer .eq strong{color:var(--ink)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chips span{background:rgba(255,255,255,.75);border:1px solid rgba(0,0,0,.08);border-radius:6px;padding:1px 8px;font-size:.82rem}
 
-  /* Section 7 : transversal */
-  .trans{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
-  .trans div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;font-size:.92rem}
+  /* Range tes outils */
+  .tools{display:flex;flex-wrap:wrap;gap:8px}
+  .tools button{background:#fff;color:var(--ink);border-color:var(--line);font-weight:600}
+  .tools button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .map{display:grid;gap:8px;margin-top:14px}
+  .map > div{border-radius:12px;padding:10px 14px;border:2px solid transparent;transition:.2s;opacity:.45}
+  .map > div.hit{opacity:1;border-color:var(--ink);transform:scale(1.01)}
+  .map .mz{font-weight:800}
+  .map .ms{font-size:.85rem;color:var(--muted)}
+  .toolinfo{margin-top:12px;min-height:80px}
 
-  .memo{background:var(--ink);color:#fff;border-radius:14px;padding:22px;margin-top:56px}
-  .memo h2{margin-top:0;color:#fff}
+  /* Piles */
+  .stack{display:grid;gap:6px;margin-top:12px}
+  .stack > div{border-radius:10px;padding:8px 12px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+  .stack .sl{font-size:.8rem;color:var(--muted);min-width:0;flex:1 1 120px}
+  .stack .sv{font-weight:700;flex:2 1 160px;min-width:0}
+  .stack .none{background:repeating-linear-gradient(45deg,#f2eee6,#f2eee6 6px,#e9e3d8 6px,#e9e3d8 12px)}
+  .stack .none .sv{font-weight:400;font-style:italic;color:var(--muted)}
+
+  /* Quiz */
+  .qitem{font-size:1.6rem;font-weight:800;margin:4px 0}
+  .answers{display:grid;gap:8px;grid-template-columns:1fr;margin-top:12px}
+  @media (min-width:640px){.answers{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .answers button{background:#fff;color:var(--ink);border-color:var(--line);text-align:left}
+  .answers button.good{background:var(--ok);border-color:var(--ok);color:#fff}
+  .answers button.bad{background:var(--ko);border-color:var(--ko);color:#fff}
+  .feedback{margin-top:12px;min-height:48px}
+  .score{font-size:.9rem;color:var(--muted)}
+
+  /* Lexique */
+  dl{margin:0}
+  dt{font-weight:800;margin-top:12px}
+  dd{margin:2px 0 0}
+
+  .memo{background:var(--ink);color:#fff;border-radius:16px;padding:20px;margin-top:56px}
+  .memo h2{color:#fff}
   .memo ol{margin:0;padding-left:20px}
-  .memo li{margin:6px 0}
-
-  @media (max-width:760px){
-    .journey{grid-template-columns:repeat(3,1fr)}
-    .stackwrap,.presetgrid{grid-template-columns:1fr}
-    .detail{position:static}
-    .words,.archs,.trans{grid-template-columns:1fr 1fr}
-    .prow .lname{width:110px}
-  }
+  .memo li{margin:8px 0}
 </style>
 </head>
 <body>
 <main>
 
-<h1>Les couches d'un site web, expliquées pas à pas</h1>
-<p class="lead">Un site, un CMS ou une web app s'empilent en couches. Chaque couche répond à une seule question et s'appuie sur la couche du dessous. Cette page te fait parcourir ces couches dans l'ordre, puis te propose de vérifier ce que tu as retenu.</p>
+<span class="chapnum">Guide pour débutant</span>
+<h1>Comprendre comment un site web est fabriqué</h1>
+<p>Tu entends parler de WordPress, Drupal, Symfony, Bootstrap, JavaScript… et tu ne sais pas qui fait quoi. C'est normal : ces outils ne font pas la même chose, et personne ne te l'a expliqué dans l'ordre.</p>
+<p>Ce guide utilise une seule image du début à la fin : <strong>un site web fonctionne comme un restaurant.</strong> Lis les chapitres dans l'ordre. Chacun prend deux minutes.</p>
 
 <nav class="toc" aria-label="Sommaire">
-  <a href="#trajet">1. Le trajet d'une page</a>
-  <a href="#pile">2. Les couches une par une</a>
-  <a href="#piles">3. Tes outils dans la pile</a>
-  <a href="#mots">4. Quatre mots à distinguer</a>
-  <a href="#archis">5. Les architectures</a>
-  <a href="#quiz">6. Teste-toi</a>
-  <a href="#transversal">7. Les outils transversaux</a>
+  <a href="#c1">1. Le restaurant</a>
+  <a href="#c2">2. Une commande</a>
+  <a href="#c3">3. La salle</a>
+  <a href="#c4">4. La cuisine</a>
+  <a href="#c5">5. Le bâtiment</a>
+  <a href="#c6">6. Range tes outils</a>
+  <a href="#c7">7. Quatre mots</a>
+  <a href="#c8">8. Différents restaurants</a>
+  <a href="#c9">9. Teste-toi</a>
+  <a href="#c10">Lexique</a>
 </nav>
 
 <!-- 1 -->
-<h2 id="trajet"><span class="num">1</span>Ce qui se passe quand tu tapes une adresse</h2>
-<p class="lead">Avant de parler de couches, suis le trajet d'une page. Clique sur les étapes ou utilise les boutons.</p>
-<div class="card">
-  <div class="journey" id="journey"></div>
-  <div class="jdetail" id="jdetail"></div>
-  <div class="jnav">
-    <button class="ghost" id="jprev">Étape précédente</button>
-    <button id="jnext">Étape suivante</button>
+<section class="chap" id="c1">
+  <span class="chapnum">Chapitre 1</span>
+  <h2>Un site web, c'est un restaurant</h2>
+  <p>Un restaurant a trois parties. Un site web aussi.</p>
+  <div class="resto">
+    <div class="salle"><div class="zt" style="color:var(--salle)">🍽️ La salle = le front-end</div>
+      <div class="zw">C'est ce que le client voit et touche : les tables, la déco, le serveur qui prend la commande. Sur le web, c'est la page qui s'affiche sur ton écran.</div></div>
+    <div class="cuisine"><div class="zt" style="color:var(--cuisine)">👨‍🍳 La cuisine = le back-end</div>
+      <div class="zw">Le client ne la voit jamais. C'est là qu'on prépare les plats et qu'on range les ingrédients. Sur le web, c'est un ordinateur à distance, appelé <em>serveur</em>, qui prépare la page.</div></div>
+    <div class="bat"><div class="zt" style="color:var(--bat)">🏢 Le bâtiment = l'infrastructure</div>
+      <div class="zw">Les murs, l'électricité, l'adresse dans la rue. Sur le web, c'est la machine louée chez un hébergeur et l'adresse du site.</div></div>
   </div>
-</div>
+  <div class="key"><b>À retenir</b>Front-end = ce que tu vois. Back-end = ce qui travaille en coulisses. Infrastructure = ce qui fait tenir le tout.</div>
+</section>
 
 <!-- 2 -->
-<h2 id="pile"><span class="num">2</span>Les couches une par une</h2>
-<p class="lead">Les couches se répartissent en trois zones : <span class="pill p-front">front-end</span> dans le navigateur, <span class="pill p-back">back-end</span> sur le serveur, <span class="pill p-infra">infrastructure</span> sous le serveur. Clique sur une couche pour afficher son rôle.</p>
-<div class="stackwrap">
-  <div id="stack"></div>
-  <div class="card detail" id="ldetail"></div>
-</div>
+<section class="chap" id="c2">
+  <span class="chapnum">Chapitre 2</span>
+  <h2>Suivre une commande, du client à l'assiette</h2>
+  <p>Quand tu ouvres un site, il se passe la même chose que quand tu commandes un plat. Avance étape par étape.</p>
+  <div class="card">
+    <div class="steps" id="steps"></div>
+    <h3 id="stitle" style="margin-top:14px"></h3>
+    <div class="duo">
+      <div class="salle-ish" style="background:#fffaf2"><div class="lbl">Au restaurant</div><div id="sresto"></div></div>
+      <div style="background:#f6f8fc"><div class="lbl">Sur le web</div><div id="sweb"></div></div>
+    </div>
+    <div class="progress"><i id="sbar"></i></div>
+    <div class="row">
+      <button class="ghost" id="sprev">← Précédent</button>
+      <button id="snext">Suivant →</button>
+    </div>
+  </div>
+</section>
 
 <!-- 3 -->
-<h2 id="piles"><span class="num">3</span>Tes outils dans la pile</h2>
-<p class="lead">Les couches restent les mêmes d'un projet à l'autre. Seul l'outil qui occupe chaque couche change. Choisis une pile pour voir qui fait quoi. Les bandes hachurées signalent une couche absente.</p>
-<div class="tabs" id="tabs"></div>
-<div class="presetgrid">
-  <div id="prows"></div>
-  <div class="card" id="pinfo"></div>
-</div>
+<section class="chap" id="c3">
+  <span class="chapnum">Chapitre 3</span>
+  <h2>La salle : HTML, CSS et JavaScript</h2>
+  <p>La page que tu vois est faite de trois couches, posées l'une sur l'autre. Le meilleur moyen de comprendre, c'est de les allumer une par une. Coche les cases ci-après dans l'ordre.</p>
+  <div class="card">
+    <div class="toggles">
+      <label><input type="checkbox" id="tHTML" checked disabled> HTML</label>
+      <label><input type="checkbox" id="tCSS"> + CSS</label>
+      <label><input type="checkbox" id="tJS"> + JavaScript</label>
+    </div>
+    <div class="stage">
+      <div class="demo" id="demo">
+        <div class="menu">
+          <h4>Menu du jour</h4>
+          <p>Soupe de potiron, tarte aux pommes.</p>
+          <button type="button" id="demoBtn">Réserver une table</button>
+          <div class="msg" id="demoMsg" hidden>✓ Table réservée pour 20 h.</div>
+        </div>
+      </div>
+    </div>
+    <div class="stage-cap" id="demoCap"></div>
+  </div>
+
+  <div class="grid g3" style="margin-top:14px">
+    <div class="layer salle"><div class="big">🧱</div><h3>HTML : le contenu</h3>
+      <p>Il dit <em>ce qu'il y a</em> sur la page : un titre, un texte, une image, un bouton.</p>
+      <div class="eq"><strong>Au restaurant :</strong> les tables et les chaises. Sans elles, il n'y a pas de salle.</div></div>
+    <div class="layer salle"><div class="big">🎨</div><h3>CSS : l'apparence</h3>
+      <p>Il dit <em>à quoi ça ressemble</em> : couleurs, polices, tailles, placement, version mobile.</p>
+      <div class="eq"><strong>Au restaurant :</strong> la déco, la peinture, les nappes.</div>
+      <div class="chips"><span>Bootstrap</span><span>Tailwind</span><span>Sass</span></div></div>
+    <div class="layer salle"><div class="big">⚡</div><h3>JavaScript : les réactions</h3>
+      <p>Il fait <em>réagir</em> la page quand tu cliques, sans tout recharger : menu qui s'ouvre, carrousel, message.</p>
+      <div class="eq"><strong>Au restaurant :</strong> le serveur qui répond quand tu lèves la main.</div>
+      <div class="chips"><span>jQuery</span><span>React</span><span>Vue</span></div></div>
+  </div>
+  <div class="key"><b>Et Bootstrap, alors ?</b>Bootstrap, c'est du CSS déjà écrit. C'est un catalogue de déco prête à poser : boutons, grilles, formulaires. Il ne s'occupe que de la salle. Il ne cuisine rien et ne range aucun contenu.</div>
+</section>
 
 <!-- 4 -->
-<h2 id="mots"><span class="num">4</span>Quatre mots à distinguer</h2>
-<p class="lead">La confusion entre « CMS » et « framework » vient de là. Ces quatre mots décrivent quatre niveaux de prise en charge, du plus libre au plus clé en main.</p>
-<div class="words">
-  <div class="word"><div class="big">🔤</div><h3>Langage</h3>
-    <p>La langue dans laquelle on écrit les instructions.</p>
-    <div class="exlist"><span>PHP</span><span>JavaScript</span><span>Python</span></div>
-    <div class="test">Test : on peut « écrire en » PHP.</div></div>
-  <div class="word"><div class="big">🧰</div><h3>Bibliothèque</h3>
-    <p>Une boîte d'outils. Ton code l'appelle quand il en a besoin.</p>
-    <div class="exlist"><span>jQuery</span><span>Chart.js</span></div>
-    <div class="test">Test : tu restes maître du plan, tu empruntes un outil.</div></div>
-  <div class="word"><div class="big">🏗️</div><h3>Framework</h3>
-    <p>Une charpente imposée. Tu écris ton code à l'intérieur, selon ses règles.</p>
-    <div class="exlist"><span>Symfony</span><span>Bootstrap</span><span>React</span></div>
-    <div class="test">Test : sans développeur, il ne produit rien d'utilisable.</div></div>
-  <div class="word"><div class="big">🏠</div><h3>CMS</h3>
-    <p>Une application finie, avec un back-office. On la configure plus qu'on ne la programme.</p>
-    <div class="exlist"><span>WordPress</span><span>Drupal</span></div>
-    <div class="test">Test : un rédacteur peut publier un article le jour de l'installation.</div></div>
-</div>
-<div class="scale"><span>Liberté totale, tout à écrire</span><div class="bar"></div><span>Clé en main, moins de liberté</span></div>
-<div class="card">
-  <h3>Le cas de Bootstrap</h3>
-  <p>Bootstrap est un framework, mais un framework <em>CSS</em>. Il fournit une grille, des boutons et des formulaires déjà stylés. Il agit seulement sur l'apparence (couche F2), avec quelques composants JavaScript (couche F3). Il ne stocke aucun contenu et n'a pas de back-office. Tu peux donc l'utiliser dans un thème WordPress, dans un thème Drupal ou sur une page HTML seule.</p>
-</div>
+<section class="chap" id="c4">
+  <span class="chapnum">Chapitre 4</span>
+  <h2>La cuisine : le serveur et ce qui tourne dessus</h2>
+  <p>La cuisine prépare la page avant de l'envoyer dans ta salle. Elle a cinq postes. Lis-les dans l'ordre où la commande les traverse.</p>
+  <div class="grid">
+    <div class="layer cuisine"><h3>① Le serveur web : celui qui reçoit les commandes</h3>
+      <p>Il reçoit la demande du visiteur et la transmet au bon endroit. Il renvoie aussi la page finie.</p>
+      <div class="eq"><strong>Au restaurant :</strong> le passe, le comptoir entre la salle et la cuisine.</div>
+      <div class="chips"><span>Apache</span><span>Nginx</span></div></div>
+    <div class="layer cuisine"><h3>② Le langage : la langue des recettes</h3>
+      <p>Les programmes de la cuisine sont écrits dans une langue que l'ordinateur comprend. Pour WordPress, Drupal et Symfony, cette langue est le <strong>PHP</strong>.</p>
+      <div class="eq"><strong>Au restaurant :</strong> la langue dans laquelle les recettes sont écrites.</div>
+      <div class="chips"><span>PHP</span><span>Python</span><span>JavaScript (Node.js)</span></div></div>
+    <div class="layer cuisine"><h3>③ Le framework : la cuisine professionnelle équipée</h3>
+      <p>Un framework fournit tout l'équipement de base : fours, plans de travail, règles d'hygiène. Un cuisinier (un développeur) doit quand même venir cuisiner.</p>
+      <div class="eq"><strong>Au restaurant :</strong> une cuisine pro vide, prête à l'emploi, mais sans chef.</div>
+      <div class="chips"><span>Symfony</span><span>Laravel</span><span>Django</span></div></div>
+    <div class="layer cuisine"><h3>④ Le CMS : le restaurant clé en main</h3>
+      <p>Un CMS est un programme déjà fini. Il a un <strong>back-office</strong> : une interface où tu changes les textes et les images sans écrire de code.</p>
+      <div class="eq"><strong>Au restaurant :</strong> une franchise prête à ouvrir. Le patron change la carte lui-même, sans être cuisinier.</div>
+      <div class="chips"><span>WordPress</span><span>Drupal</span><span>Joomla</span><span>PrestaShop</span></div></div>
+    <div class="layer cuisine"><h3>⑤ La base de données : la chambre froide</h3>
+      <p>C'est là que tout le contenu est rangé : les textes, les comptes, les commandes. Le CMS vient y chercher ce dont il a besoin à chaque visite.</p>
+      <div class="eq"><strong>Au restaurant :</strong> la chambre froide où attendent les ingrédients.</div>
+      <div class="chips"><span>MySQL</span><span>MariaDB</span><span>PostgreSQL</span></div></div>
+  </div>
+  <div class="key"><b>Le piège classique : CMS ou framework ?</b>Un framework, c'est une cuisine équipée : il faut un chef pour cuisiner. Un CMS, c'est un restaurant entier qui tourne déjà : tu changes la carte toi-même. Drupal est un CMS construit avec des outils de Symfony. Il a donc été installé dans une cuisine Symfony. WordPress, lui, a construit sa propre cuisine.</div>
+</section>
 
 <!-- 5 -->
-<h2 id="archis"><span class="num">5</span>Les architectures : où se fabrique la page</h2>
-<p class="lead">Une architecture décrit l'endroit où la page est assemblée. Les couches restent les mêmes, mais leur répartition change.</p>
-<div class="archs">
-  <div class="arch"><h3>Monolithique</h3>
-    <div class="flow">Navigateur ← HTML ← CMS + BDD</div>
-    <p>Le CMS assemble la page complète sur le serveur. C'est le fonctionnement d'un WordPress ou d'un Drupal classique.</p></div>
-  <div class="arch"><h3>Headless</h3>
-    <div class="flow">Navigateur ← React ← JSON ← CMS</div>
-    <p>Le CMS fournit seulement les données, via une API. Un front-end séparé les met en page.</p></div>
-  <div class="arch"><h3>Site statique</h3>
-    <div class="flow">Générateur → fichiers HTML → Navigateur</div>
-    <p>Un générateur (Hugo, Astro, Jekyll) fabrique toutes les pages à l'avance. Le serveur n'a plus de base de données.</p></div>
-  <div class="arch"><h3>SaaS ou no-code</h3>
-    <div class="flow">Toi → éditeur visuel → plateforme</div>
-    <p>La plateforme (Wix, Webflow, Shopify) gère toutes les couches serveur. Tu agis seulement sur le contenu et le design.</p></div>
-  <div class="arch"><h3>Web app (SPA)</h3>
-    <div class="flow">App JS dans le navigateur ⇄ API</div>
-    <p>Une application JavaScript tourne dans le navigateur et échange des données sans recharger la page, comme Gmail ou Notion.</p></div>
-  <div class="arch"><h3>Application mobile</h3>
-    <div class="flow">App iOS / Android ⇄ API ⇄ back-end</div>
-    <p>Le front-end est natif (Swift, Kotlin) ou multiplateforme (Flutter, React Native). Le back-end peut servir aussi le site.</p></div>
-</div>
+<section class="chap" id="c5">
+  <span class="chapnum">Chapitre 5</span>
+  <h2>Le bâtiment : où vit le site</h2>
+  <p>La cuisine doit tenir dans un local, avec une adresse que les clients trouvent.</p>
+  <div class="grid g3">
+    <div class="layer bat"><div class="big">🏠</div><h3>L'hébergeur</h3>
+      <p>Une entreprise qui te loue un ordinateur allumé jour et nuit, branché à Internet.</p>
+      <div class="eq"><strong>Au restaurant :</strong> le propriétaire qui loue le local.</div>
+      <div class="chips"><span>OVH</span><span>o2switch</span><span>AWS</span></div></div>
+    <div class="layer bat"><div class="big">🪧</div><h3>Le nom de domaine</h3>
+      <p>L'adresse lisible du site, comme <code>dajm.fr</code>. Tu la loues à l'année.</p>
+      <div class="eq"><strong>Au restaurant :</strong> le nom sur l'enseigne.</div></div>
+    <div class="layer bat"><div class="big">📒</div><h3>Le DNS</h3>
+      <p>Un annuaire. Il traduit <code>dajm.fr</code> en numéro de machine, appelé adresse IP.</p>
+      <div class="eq"><strong>Au restaurant :</strong> le GPS qui transforme un nom en adresse précise.</div>
+      <div class="chips"><span>Cloudflare</span></div></div>
+  </div>
+</section>
 
 <!-- 6 -->
-<h2 id="quiz"><span class="num">6</span>Teste-toi</h2>
-<p class="lead">Pour chaque outil, choisis la couche qu'il occupe. L'explication s'affiche après ta réponse.</p>
-<div class="card quiz">
-  <span class="score" id="score"></span>
-  <div class="hint" id="qcount"></div>
-  <div class="item" id="qitem"></div>
-  <div class="answers" id="answers"></div>
-  <div class="feedback" id="feedback"></div>
-  <button id="qnext" disabled>Outil suivant</button>
-</div>
+<section class="chap" id="c6">
+  <span class="chapnum">Chapitre 6</span>
+  <h2>Range tes outils</h2>
+  <p>Touche un outil. Le schéma t'indique où il travaille dans le restaurant.</p>
+  <div class="card">
+    <div class="tools" id="tools"></div>
+    <div class="map" id="map"></div>
+    <div class="toolinfo" id="toolinfo"><p class="muted">Choisis un outil pour commencer.</p></div>
+  </div>
+
+  <h3 style="margin-top:24px">Deux restaurants que tu connais, couche par couche</h3>
+  <p>Choisis un projet. Les bandes hachurées signalent un poste qui n'existe pas dans ce projet.</p>
+  <div class="row" id="ptabs"></div>
+  <div class="card">
+    <p id="pintro" style="margin:0"></p>
+    <div class="stack" id="pstack"></div>
+  </div>
+</section>
 
 <!-- 7 -->
-<h2 id="transversal"><span class="num">7</span>Les outils transversaux</h2>
-<p class="lead">Certains outils ne forment pas une couche. Ils servent toutes les couches à la fois.</p>
-<div class="trans">
-  <div><h3>Versionnement</h3>Git, GitHub, GitLab. Ils gardent l'historique de chaque modification du code.</div>
-  <div><h3>Déploiement (CI/CD)</h3>GitHub Actions, GitLab CI. Ils testent et mettent en ligne le code automatiquement.</div>
-  <div><h3>Dépendances</h3>Composer pour PHP, npm pour JavaScript. Ils installent les bibliothèques et frameworks.</div>
-  <div><h3>API</h3>REST, GraphQL. Elles font circuler les données entre deux couches ou deux logiciels.</div>
-  <div><h3>Sécurité</h3>HTTPS, pare-feu, sauvegardes, mises à jour. Chaque couche peut avoir une faille.</div>
-  <div><h3>Mesure et SEO</h3>Matomo, Google Analytics, Search Console. Ils mesurent l'audience et la visibilité.</div>
-</div>
+<section class="chap" id="c7">
+  <span class="chapnum">Chapitre 7</span>
+  <h2>Quatre mots qu'on mélange tout le temps</h2>
+  <p>Ces quatre mots vont du plus « à faire soi-même » au plus « tout prêt ».</p>
+  <div class="grid g4">
+    <div class="card" style="margin:0"><div class="big">🔤</div><h3>Langage</h3>
+      <p>La langue dans laquelle on écrit.</p><p class="muted">Cuisine : le français des recettes.</p>
+      <div class="chips"><span>PHP</span><span>JavaScript</span></div></div>
+    <div class="card" style="margin:0"><div class="big">🥄</div><h3>Bibliothèque</h3>
+      <p>Un outil qu'on prend quand on en a besoin.</p><p class="muted">Cuisine : un économe dans le tiroir.</p>
+      <div class="chips"><span>jQuery</span></div></div>
+    <div class="card" style="margin:0"><div class="big">🏗️</div><h3>Framework</h3>
+      <p>Une base équipée, avec ses règles. Il faut un développeur.</p><p class="muted">Cuisine : une cuisine pro sans chef.</p>
+      <div class="chips"><span>Symfony</span><span>Bootstrap</span><span>React</span></div></div>
+    <div class="card" style="margin:0"><div class="big">🏪</div><h3>CMS</h3>
+      <p>Un logiciel fini, avec un back-office.</p><p class="muted">Cuisine : une franchise prête à ouvrir.</p>
+      <div class="chips"><span>WordPress</span><span>Drupal</span></div></div>
+  </div>
+  <div class="key"><b>Un test pour trancher</b>Le jour de l'installation, quelqu'un qui ne code pas peut-il publier un article ? Si oui, c'est un CMS. Sinon, c'est un framework, une bibliothèque ou un langage.</div>
+</section>
+
+<!-- 8 -->
+<section class="chap" id="c8">
+  <span class="chapnum">Chapitre 8</span>
+  <h2>Il existe plusieurs sortes de restaurants</h2>
+  <p>Les postes restent les mêmes. Ce qui change, c'est qui les tient et où le plat est préparé.</p>
+  <div class="grid g2">
+    <div class="card" style="margin:0"><div class="big">🍲</div><h3>Le restaurant classique</h3>
+      <p>La cuisine prépare chaque plat à la commande et l'envoie en salle.</p>
+      <p class="muted">Sur le web : WordPress ou Drupal fabriquent chaque page à la demande.</p></div>
+    <div class="card" style="margin:0"><div class="big">🥪</div><h3>Les plats préparés à l'avance</h3>
+      <p>Tout est cuisiné le matin. On sert sans cuisiner. C'est très rapide, mais la carte change peu.</p>
+      <p class="muted">Sur le web : un site statique (Hugo, Astro). Les pages sont fabriquées une fois pour toutes.</p></div>
+    <div class="card" style="margin:0"><div class="big">🏬</div><h3>Le stand en centre commercial</h3>
+      <p>Le centre fournit le local, la cuisine et le ménage. Tu choisis la déco et la carte.</p>
+      <p class="muted">Sur le web : Wix, Webflow, Shopify. La plateforme gère toute la cuisine à ta place.</p></div>
+    <div class="card" style="margin:0"><div class="big">🚚</div><h3>La cuisine centrale qui livre</h3>
+      <p>Une seule cuisine prépare les plats. Elle livre plusieurs salles différentes.</p>
+      <p class="muted">Sur le web : le « headless ». Le CMS envoie seulement le contenu. Un site et une appli mobile l'affichent chacun à leur façon.</p></div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="chap" id="c9">
+  <span class="chapnum">Chapitre 9</span>
+  <h2>Teste-toi</h2>
+  <p>Pour chaque outil, choisis son poste dans le restaurant. Pas de stress : l'explication s'affiche après chaque réponse.</p>
+  <div class="card">
+    <div class="score" id="score"></div>
+    <div class="qitem" id="qitem"></div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+    <button id="qnext" disabled>Outil suivant →</button>
+  </div>
+</section>
+
+<!-- Lexique -->
+<section class="chap" id="c10">
+  <span class="chapnum">Pour aller plus loin</span>
+  <h2>Petit lexique</h2>
+  <div class="card">
+    <dl>
+      <dt>Front-end</dt><dd>Tout ce qui s'affiche et s'exécute dans ton navigateur. La salle.</dd>
+      <dt>Back-end</dt><dd>Tout ce qui s'exécute sur le serveur. La cuisine.</dd>
+      <dt>Serveur</dt><dd>Un ordinateur à distance, allumé en permanence, qui fabrique et envoie les pages.</dd>
+      <dt>Navigateur</dt><dd>Le logiciel qui affiche les sites : Chrome, Safari, Firefox.</dd>
+      <dt>Back-office</dt><dd>L'espace d'administration d'un CMS, où tu modifies le contenu sans coder.</dd>
+      <dt>Thème</dt><dd>Le « décor » d'un CMS : son HTML, son CSS et son JavaScript.</dd>
+      <dt>Extension (plugin, module)</dt><dd>Un ajout qui donne une nouvelle fonction à un CMS, comme un formulaire de contact.</dd>
+      <dt>API</dt><dd>Un guichet par lequel deux logiciels s'échangent des données. Le passe-plat entre deux cuisines.</dd>
+      <dt>Git, GitHub</dt><dd>Les outils qui gardent l'historique de chaque modification du code. Le cahier où l'on note chaque changement de recette.</dd>
+      <dt>Stack (pile)</dt><dd>La liste des outils choisis pour chaque poste d'un projet. Par exemple : Drupal + PHP + MySQL + Bootstrap.</dd>
+    </dl>
+  </div>
+</section>
 
 <div class="memo">
-  <h2>À retenir</h2>
+  <h2>Les 5 phrases à retenir</h2>
   <ol>
-    <li>Le front-end s'exécute dans le navigateur : HTML pour la structure, CSS pour l'apparence, JavaScript pour le comportement.</li>
-    <li>Le back-end s'exécute sur le serveur : il lit la base de données et prépare la réponse.</li>
-    <li>Un CMS (WordPress, Drupal) est une application finie. Un framework (Symfony, Bootstrap) est une charpente pour développeur.</li>
-    <li>Drupal repose sur Symfony. WordPress n'utilise pas de framework.</li>
-    <li>Pour situer un outil inconnu, demande-toi à quelle question il répond, puis cherche la couche correspondante dans la section 2.</li>
+    <li>Un site, c'est une salle (front-end), une cuisine (back-end) et un bâtiment (infrastructure).</li>
+    <li>Dans la salle : HTML pour le contenu, CSS pour l'apparence, JavaScript pour les réactions.</li>
+    <li>Bootstrap est du CSS prêt à l'emploi. Il ne travaille que dans la salle.</li>
+    <li>Symfony est une cuisine équipée (framework). WordPress et Drupal sont des restaurants clé en main (CMS).</li>
+    <li>Drupal est bâti sur des outils Symfony. WordPress, non.</li>
   </ol>
 </div>
 
 </main>
 
 <script>
-/* ---------- 1. Trajet ---------- */
-const journey = [
-  {ico:"⌨️", t:"Tu tapes l'adresse", zone:"infra",
-   d:"Tu saisis <code>dajm.fr</code> dans le navigateur. Le navigateur demande à un annuaire, le <b>DNS</b>, quelle machine se cache derrière ce nom. Le DNS renvoie une adresse IP, par exemple <code>51.91.12.34</code>."},
-  {ico:"📨", t:"La requête part", zone:"infra",
-   d:"Le navigateur envoie une requête <b>HTTPS</b> à cette adresse : « Donne-moi la page d'accueil. » La requête traverse Internet jusqu'au serveur de l'<b>hébergeur</b>, par exemple OVH."},
-  {ico:"🚪", t:"Le serveur web la reçoit", zone:"back",
-   d:"Sur la machine, le <b>serveur web</b> (Apache ou Nginx) reçoit la requête. Il ne sait pas fabriquer la page lui-même. Il la transmet au programme concerné, écrit en <b>PHP</b>."},
-  {ico:"⚙️", t:"Le CMS prépare la page", zone:"back",
-   d:"Le <b>CMS</b> (WordPress ou Drupal) comprend ce qui est demandé. Il interroge la <b>base de données</b> (MySQL) pour récupérer le titre, les textes et les images de la page d'accueil."},
-  {ico:"📦", t:"La réponse revient", zone:"back",
-   d:"Le CMS insère ces contenus dans les gabarits du <b>thème</b>. Il produit un fichier <b>HTML</b>, accompagné de fichiers <b>CSS</b> et <b>JavaScript</b>. Le serveur renvoie le tout au navigateur."},
-  {ico:"🖥️", t:"Le navigateur affiche", zone:"front",
-   d:"Le navigateur lit le HTML pour construire la page. Il applique le CSS, par exemple celui de Bootstrap, pour la mettre en forme. Il exécute le JavaScript pour rendre les menus et carrousels interactifs. Tout ce trajet dure environ une seconde."}
+/* ---------- Chapitre 2 : la commande ---------- */
+const steps=[
+ {t:"Le client choisit un restaurant",
+  r:"Tu cherches l'adresse du restaurant « DAJM » sur ton GPS.",
+  w:"Tu tapes <code>dajm.fr</code> dans ton navigateur. Un annuaire, le <strong>DNS</strong>, donne l'adresse exacte de la machine."},
+ {t:"Le client passe commande",
+  r:"Tu t'assois et tu demandes au serveur : « Le menu du jour, s'il vous plaît. »",
+  w:"Ton navigateur envoie une <strong>requête</strong> à la machine : « Donne-moi la page d'accueil. »"},
+ {t:"La commande arrive au passe",
+  r:"Le serveur dépose le bon de commande au comptoir de la cuisine.",
+  w:"Le <strong>serveur web</strong> (Apache ou Nginx) reçoit la requête et la transmet au programme qui fabrique les pages."},
+ {t:"Le chef cherche les ingrédients",
+  r:"Le chef lit la commande et va chercher les ingrédients dans la chambre froide.",
+  w:"Le <strong>CMS</strong> (WordPress ou Drupal) comprend ce qui est demandé. Il va chercher les textes et les images dans la <strong>base de données</strong>."},
+ {t:"Le plat est dressé",
+  r:"Le chef dresse l'assiette selon la présentation de la maison.",
+  w:"Le CMS place le contenu dans le <strong>thème</strong>. Il obtient une page en <strong>HTML</strong>, avec son <strong>CSS</strong> et son <strong>JavaScript</strong>."},
+ {t:"Le client est servi",
+  r:"L'assiette arrive à ta table. Tu manges.",
+  w:"Ton navigateur reçoit la page et l'affiche. Tout ce trajet a pris environ une seconde."}
 ];
-let js=0;
-const jEl=document.getElementById("journey"), jd=document.getElementById("jdetail");
-journey.forEach((s,i)=>{const b=document.createElement("div");b.className="jstep";b.innerHTML=`<span class="ico">${s.ico}</span>${i+1}. ${s.t}`;b.onclick=()=>showJ(i);jEl.appendChild(b);});
-const zoneName={front:"Front-end",back:"Back-end",infra:"Infrastructure"};
-function showJ(i){js=i;[...jEl.children].forEach((c,k)=>c.classList.toggle("on",k===i));
-  const s=journey[i];jd.innerHTML=`<span class="pill p-${s.zone}">${zoneName[s.zone]}</span><h3 style="margin-top:8px">Étape ${i+1} : ${s.t}</h3><p>${s.d}</p>`;
-  jprev.disabled=i===0;jnext.disabled=i===journey.length-1;}
-const jprev=document.getElementById("jprev"), jnext=document.getElementById("jnext");
-jprev.onclick=()=>showJ(js-1); jnext.onclick=()=>showJ(js+1); showJ(0);
+let si=0;
+const sEl=document.getElementById("steps");
+steps.forEach((s,i)=>{const b=document.createElement("button");b.textContent=i+1;b.setAttribute("aria-label","Étape "+(i+1));b.onclick=()=>showS(i);sEl.appendChild(b);});
+function showS(i){si=i;[...sEl.children].forEach((b,k)=>b.classList.toggle("on",k===i));
+  const s=steps[i];stitle.textContent=`Étape ${i+1} sur ${steps.length} : ${s.t}`;
+  sresto.innerHTML=s.r;sweb.innerHTML=s.w;sbar.style.width=((i+1)/steps.length*100)+"%";
+  sprev.disabled=i===0;snext.disabled=i===steps.length-1;}
+sprev.onclick=()=>showS(si-1);snext.onclick=()=>showS(si+1);showS(0);
 
-/* ---------- 2. Couches ---------- */
-const layers=[
- {id:"F1",z:"front",n:"Structure",ex:"HTML",q:"Qu'est-ce qu'il y a sur la page ?",
-  d:"Le HTML décrit le contenu et son organisation : un titre, un paragraphe, une image, un bouton, un formulaire. Il ne dit rien de l'apparence.",
-  a:"Dans un restaurant, ce sont les tables, les chaises et le comptoir : la disposition de la salle.",
-  w:"La page n'existe pas. Le HTML est la seule couche indispensable à toute page web.",
-  e:["HTML","Twig (gabarits Drupal, Symfony)","Gabarits PHP de WordPress"]},
- {id:"F2",z:"front",n:"Apparence",ex:"CSS, Bootstrap",q:"À quoi la page ressemble-t-elle ?",
-  d:"Le CSS fixe les couleurs, les polices, les marges, la grille et l'adaptation au mobile. Un framework CSS comme Bootstrap fournit ces règles déjà écrites.",
-  a:"C'est la décoration de la salle : peinture, éclairage, nappes.",
-  w:"La page s'affiche en texte noir sur fond blanc, empilé de haut en bas.",
-  e:["CSS","Bootstrap","Tailwind","Sass (CSS enrichi)"]},
- {id:"F3",z:"front",n:"Comportement",ex:"JavaScript, React",q:"Qu'est-ce qui réagit sans recharger la page ?",
-  d:"Le JavaScript s'exécute dans le navigateur. Il ouvre un menu, fait défiler un carrousel, filtre une liste ou envoie un formulaire sans recharger la page.",
-  a:"C'est le personnel de salle : il réagit aux demandes des clients sur place.",
-  w:"La page reste figée. Chaque clic recharge une nouvelle page depuis le serveur.",
-  e:["JavaScript","jQuery","React","Vue","Angular","Alpine.js"]},
- {id:"F4",z:"front",n:"Outils de build",ex:"npm, Vite",q:"Comment le code est-il préparé avant sa mise en ligne ?",
-  d:"Ces outils travaillent sur l'ordinateur du développeur, jamais chez le visiteur. Ils compilent le Sass en CSS, regroupent et compressent les fichiers JavaScript.",
-  a:"C'est la préparation en cuisine avant le service : on épluche et on découpe à l'avance.",
-  w:"Sur un petit site, rien ne change. Sur un gros projet React, le code n'est pas utilisable tel quel.",
-  e:["npm","Vite","Webpack","Sass","PostCSS"]},
- {id:"B1",z:"back",n:"CMS / application",ex:"WordPress, Drupal",q:"Comment un non-développeur gère-t-il le contenu ?",
-  d:"Le CMS fournit un back-office : créer une page, publier un article, gérer les comptes et les menus. Il décide quel contenu envoyer pour chaque adresse demandée.",
-  a:"C'est le gérant du restaurant : il tient la carte et organise le service, sans cuisiner lui-même.",
-  w:"Chaque modification de texte exige un développeur, ou bien une application codée sur mesure fournit son propre back-office.",
-  e:["WordPress","Drupal","Joomla","PrestaShop","Magento","Strapi (headless)"]},
- {id:"B2",z:"back",n:"Framework back-end",ex:"Symfony, Laravel",q:"Sur quelle charpente le développeur construit-il la logique ?",
-  d:"Le framework fournit les briques communes à toute application : routes (quelle adresse appelle quel code), sécurité, formulaires, accès à la base de données. Le développeur écrit la logique métier par-dessus.",
-  a:"C'est la cuisine professionnelle équipée : fours, plans de travail, normes d'hygiène. On y cuisine plus vite et plus sûrement.",
-  w:"Le développeur écrit toutes ces briques lui-même. C'est le cas de WordPress, qui n'utilise pas de framework.",
-  e:["Symfony","Laravel","Django","Express","Ruby on Rails","Spring"]},
- {id:"B3",z:"back",n:"Langage back-end",ex:"PHP, Python",q:"En quelle langue le serveur est-il programmé ?",
-  d:"Le langage est la langue des instructions exécutées sur le serveur. Le CMS et le framework sont eux-mêmes écrits dans ce langage.",
-  a:"C'est la langue que parlent les cuisiniers entre eux.",
-  w:"Rien ne tourne côté serveur. Seul un site statique fonctionne sans langage back-end.",
-  e:["PHP","Python","JavaScript (Node.js)","Ruby","Java","C#"]},
- {id:"B4",z:"back",n:"Base de données",ex:"MySQL",q:"Où le contenu est-il stocké ?",
-  d:"La base de données range le contenu dans des tables : articles, pages, utilisateurs, commandes. Le CMS la lit et l'écrit à chaque visite.",
-  a:"C'est la chambre froide : les ingrédients y attendent d'être cuisinés.",
-  w:"Le contenu doit être écrit en dur dans les fichiers, comme sur un site statique.",
-  e:["MySQL","MariaDB","PostgreSQL","SQLite","MongoDB"]},
- {id:"B5",z:"back",n:"Serveur web",ex:"Apache, Nginx",q:"Qui reçoit la requête et renvoie la réponse ?",
-  d:"Le serveur web écoute les requêtes qui arrivent sur la machine. Il renvoie directement les fichiers simples (images, CSS) et transmet le reste au programme PHP.",
-  a:"C'est le passe, le comptoir entre la salle et la cuisine : les commandes arrivent, les assiettes repartent.",
-  w:"La machine ne répond à aucun visiteur.",
-  e:["Apache","Nginx","LiteSpeed","Caddy"]},
- {id:"I1",z:"infra",n:"Système",ex:"Linux",q:"Quel système fait tourner la machine ?",
-  d:"Le système d'exploitation fait fonctionner le serveur, comme Windows ou macOS sur ton ordinateur. La grande majorité des serveurs web tournent sous Linux.",
-  a:"Ce sont l'eau, le gaz et l'électricité du bâtiment.",
-  w:"Aucun logiciel ne peut s'exécuter.",
-  e:["Linux (Debian, Ubuntu)","Windows Server","Docker (conteneurs)"]},
- {id:"I2",z:"infra",n:"Hébergement",ex:"OVH, AWS",q:"Sur quelle machine, et chez qui ?",
-  d:"L'hébergeur loue la machine. En mutualisé, tu partages un serveur avec d'autres clients. En VPS ou en cloud, tu disposes de ressources dédiées.",
-  a:"C'est le local loué pour le restaurant.",
-  w:"Le site existe seulement sur l'ordinateur du développeur.",
-  e:["OVH","o2switch","Infomaniak","AWS","Google Cloud","Platform.sh"]},
- {id:"I3",z:"infra",n:"Réseau et adresse",ex:"Domaine, DNS, CDN",q:"Comment les visiteurs trouvent-ils la machine ?",
-  d:"Le nom de domaine est l'adresse lisible. Le DNS traduit ce nom en adresse IP. Le certificat HTTPS chiffre les échanges. Un CDN copie les fichiers près des visiteurs pour accélérer l'affichage.",
-  a:"C'est l'adresse postale et l'enseigne sur la façade.",
-  w:"Le site est accessible seulement par une adresse IP, comme <code>51.91.12.34</code>.",
-  e:["Nom de domaine","DNS","HTTPS / SSL","Cloudflare (CDN)"]}
+/* ---------- Chapitre 3 : démo ---------- */
+const demo=document.getElementById("demo"),tCSS=document.getElementById("tCSS"),tJS=document.getElementById("tJS"),cap=document.getElementById("demoCap"),msg=document.getElementById("demoMsg");
+function upd(){demo.classList.toggle("css",tCSS.checked);msg.hidden=true;
+  if(!tCSS.checked&&!tJS.checked)cap.innerHTML="<strong>HTML seul :</strong> le contenu est là, mais tout est brut, comme une salle avec des tables nues. Clique sur le bouton : rien ne se passe.";
+  else if(tCSS.checked&&!tJS.checked)cap.innerHTML="<strong>HTML + CSS :</strong> même contenu, mais maintenant décoré. Le bouton ne fait toujours rien quand tu cliques.";
+  else if(!tCSS.checked&&tJS.checked)cap.innerHTML="<strong>HTML + JavaScript :</strong> le bouton réagit, mais la page reste moche. Coche aussi CSS.";
+  else cap.innerHTML="<strong>Les trois ensemble :</strong> contenu, décoration et réaction. Clique sur le bouton.";}
+document.getElementById("demoBtn").onclick=()=>{if(tJS.checked)msg.hidden=false;};
+tCSS.onchange=upd;tJS.onchange=upd;upd();
+
+/* ---------- Chapitre 6 : range tes outils ---------- */
+const posts=[
+ {id:"html",z:"salle",n:"Salle · contenu (HTML)",s:"Ce qu'il y a sur la page"},
+ {id:"css",z:"salle",n:"Salle · déco (CSS)",s:"À quoi ça ressemble"},
+ {id:"js",z:"salle",n:"Salle · réactions (JavaScript)",s:"Ce qui bouge quand tu cliques"},
+ {id:"cms",z:"cuisine",n:"Cuisine · restaurant clé en main (CMS)",s:"Le back-office pour gérer le contenu"},
+ {id:"fw",z:"cuisine",n:"Cuisine · cuisine équipée (framework)",s:"La base pour les développeurs"},
+ {id:"lang",z:"cuisine",n:"Cuisine · langue des recettes (langage)",s:"Ce dans quoi le code est écrit"},
+ {id:"db",z:"cuisine",n:"Cuisine · chambre froide (base de données)",s:"Où le contenu est rangé"},
+ {id:"web",z:"cuisine",n:"Cuisine · passe (serveur web)",s:"Qui reçoit les commandes"},
+ {id:"bat",z:"bat",n:"Bâtiment (hébergement, adresse)",s:"Où vit le site"}
 ];
-const st=document.getElementById("stack"), ld=document.getElementById("ldetail");
-const zl={front:"Dans le navigateur du visiteur",back:"Sur le serveur",infra:"Sous le serveur"};
-let lastZ=null;
-layers.forEach(l=>{
-  if(l.z!==lastZ){
-    if(lastZ==="front"){const w=document.createElement("div");w.className="wire";w.textContent="▲ requête HTTP   ·   réponse : HTML ou JSON ▼";st.appendChild(w);}
-    const h=document.createElement("div");h.className="zone-label";h.style.color=`var(--${l.z})`;h.textContent=zl[l.z];st.appendChild(h);lastZ=l.z;}
-  const b=document.createElement("button");b.className=`layer ${l.z}`;b.dataset.id=l.id;
-  b.innerHTML=`<span class="code">${l.id}</span><span class="nm">${l.n}</span><span class="ex">${l.ex}</span>`;
-  b.onclick=()=>showL(l.id);st.appendChild(b);});
-function showL(id){const l=layers.find(x=>x.id===id);
-  st.querySelectorAll(".layer").forEach(b=>b.classList.toggle("on",b.dataset.id===id));
-  ld.innerHTML=`<span class="pill p-${l.z}">${l.id} · ${zoneName[l.z]}</span>
-   <div class="q">${l.q}</div><p>${l.d}</p>
-   <div class="analogy"><b>Pour se représenter</b>${l.a}</div>
-   <p class="ifnot"><strong>Sans cette couche :</strong> ${l.w}</p>
-   <strong style="font-size:.9rem">Exemples</strong><div class="exlist">${l.e.map(x=>`<span>${x}</span>`).join("")}</div>`;}
-showL("F2");
+const tools=[
+ {n:"WordPress",p:["cms"],d:"WordPress est un <strong>CMS</strong>, un restaurant clé en main. Tu modifies ton site depuis son back-office. Il est écrit en PHP et range ses contenus dans MySQL."},
+ {n:"Drupal",p:["cms","fw"],d:"Drupal est un <strong>CMS</strong>. Il est bâti sur des outils du framework <strong>Symfony</strong> : c'est un restaurant installé dans une cuisine Symfony. C'est pourquoi deux postes s'allument."},
+ {n:"Symfony",p:["fw"],d:"Symfony est un <strong>framework</strong> : une cuisine pro équipée, mais sans chef. Un développeur l'utilise pour coder une application sur mesure."},
+ {n:"Bootstrap",p:["css"],d:"Bootstrap est un <strong>framework CSS</strong> : de la déco prête à poser. Il ajoute un peu de JavaScript pour ses menus, mais son travail principal est l'apparence."},
+ {n:"JavaScript",p:["js"],d:"JavaScript est un <strong>langage</strong> qui fait réagir la page dans ton navigateur. Il peut aussi tourner en cuisine (Node.js), mais ce cas est plus rare dans tes projets."},
+ {n:"PHP",p:["lang"],d:"PHP est le <strong>langage</strong> des recettes de WordPress, Drupal et Symfony."},
+ {n:"MySQL",p:["db"],d:"MySQL est une <strong>base de données</strong> : la chambre froide où le CMS range les textes, les comptes et les commandes."},
+ {n:"OVH",p:["bat"],d:"OVH est un <strong>hébergeur</strong>. Il loue la machine sur laquelle tourne ton site."}
+];
+const map=document.getElementById("map"),tEl=document.getElementById("tools"),tinfo=document.getElementById("toolinfo");
+posts.forEach(p=>{const d=document.createElement("div");d.className=p.z;d.dataset.id=p.id;d.innerHTML=`<div class="mz">${p.n}</div><div class="ms">${p.s}</div>`;map.appendChild(d);});
+tools.forEach((t,i)=>{const b=document.createElement("button");b.textContent=t.n;b.onclick=()=>{
+  tEl.querySelectorAll("button").forEach((x,k)=>x.classList.toggle("on",k===i));
+  map.querySelectorAll("div[data-id]").forEach(d=>d.classList.toggle("hit",t.p.includes(d.dataset.id)));
+  tinfo.innerHTML=`<p>${t.d}</p>`;};tEl.appendChild(b);});
 
-/* ---------- 3. Piles ---------- */
-const presets={
- wordpress:{label:"WordPress",
-  v:{F1:"Thème WordPress (gabarits PHP)",F2:"CSS du thème, parfois Bootstrap",F3:"JavaScript, jQuery",F4:"Facultatif",B1:"WordPress",B2:null,B3:"PHP",B4:"MySQL ou MariaDB",B5:"Apache ou Nginx",I1:"Linux",I2:"Hébergeur (OVH, o2switch)",I3:"Ton domaine"},
-  info:"<h3>WordPress</h3><p>WordPress est un CMS écrit en PHP. Il n'utilise pas de framework back-end : son code fournit lui-même ses briques. Les extensions ajoutent des fonctions, les thèmes gèrent l'apparence.</p><p class='who'>Tu interviens surtout sur le contenu (B1) et sur le thème (F1 à F3).</p>"},
- drupal:{label:"Drupal",
-  v:{F1:"Thème Drupal (gabarits Twig)",F2:"CSS du thème, souvent Bootstrap",F3:"JavaScript",F4:"npm, Sass",B1:"Drupal",B2:"Composants Symfony",B3:"PHP",B4:"MySQL ou PostgreSQL",B5:"Apache ou Nginx",I1:"Linux",I2:"Hébergeur ou Platform.sh",I3:"Ton domaine"},
-  info:"<h3>Drupal</h3><p>Drupal est un CMS écrit en PHP. Depuis la version 8, il s'appuie sur des composants Symfony et sur le moteur de gabarits Twig. Il convient aux sites riches en types de contenus et en droits d'accès.</p><p class='who'>Un développeur Symfony retrouve donc ses repères dans Drupal.</p>"},
- symfony:{label:"Symfony sur mesure",
-  v:{F1:"Gabarits Twig",F2:"CSS, Bootstrap ou Tailwind",F3:"JavaScript",F4:"npm, Webpack Encore",B1:null,B2:"Symfony",B3:"PHP",B4:"MySQL ou PostgreSQL",B5:"Nginx",I1:"Linux",I2:"VPS ou cloud",I3:"Ton domaine"},
-  info:"<h3>Application Symfony sur mesure</h3><p>Sans CMS, le développeur code toute l'application sur la charpente Symfony. Il code aussi le back-office si le client en a besoin. Cette pile convient aux web apps métier : extranet, outil de réservation, plateforme.</p><p class='who'>Plus de liberté, plus de développement, donc un budget plus élevé.</p>"},
- headless:{label:"Headless",
-  v:{F1:"Composants React",F2:"Tailwind ou CSS",F3:"React, Next.js",F4:"npm, Vite",B1:"Drupal ou Strapi (API seule)",B2:"Symfony ou Node.js",B3:"PHP ou JavaScript",B4:"PostgreSQL",B5:"Nginx",I1:"Linux",I2:"Cloud + Vercel pour le front",I3:"Ton domaine, CDN"},
-  info:"<h3>Headless</h3><p>Le CMS garde son back-office, mais il ne fabrique plus les pages. Il envoie le contenu en JSON via une API. Une application React distincte affiche ce contenu sur le site, et parfois aussi dans une application mobile.</p><p class='who'>Deux projets à maintenir au lieu d'un : le CMS et le front-end.</p>"},
- statique:{label:"Site statique",
-  v:{F1:"HTML généré",F2:"CSS",F3:"Peu ou pas de JavaScript",F4:"Hugo, Astro ou Jekyll",B1:null,B2:null,B3:null,B4:null,B5:"Serveur de fichiers",I1:"Géré par l'hébergeur",I2:"Netlify, GitHub Pages",I3:"Ton domaine, CDN"},
-  info:"<h3>Site statique</h3><p>Un générateur fabrique toutes les pages HTML à l'avance, sur l'ordinateur du développeur. Le serveur se contente de distribuer des fichiers. Le site est rapide et difficile à pirater, mais un non-développeur ne peut pas le modifier sans outil complémentaire.</p>"},
- wix:{label:"Wix, Webflow, Shopify",
-  m:true,
-  v:{F1:"Généré par l'éditeur visuel",F2:"Généré par l'éditeur visuel",F3:"Généré par la plateforme",F4:"Invisible",B1:"Back-office de la plateforme",B2:"Invisible",B3:"Invisible",B4:"Invisible",B5:"Invisible",I1:"Invisible",I2:"La plateforme",I3:"Ton domaine"},
-  info:"<h3>SaaS ou no-code</h3><p>La plateforme possède et gère toutes les couches. Tu agis à travers un éditeur visuel et un back-office. Tu ne vois aucun code, sauf options avancées.</p><p class='who'>Mise en ligne rapide, abonnement mensuel, dépendance à la plateforme.</p>"}
+/* ---------- Chapitre 6 : deux piles ---------- */
+const rows=[["salle","Contenu (HTML)"],["salle","Déco (CSS)"],["salle","Réactions (JS)"],["cuisine","CMS"],["cuisine","Framework"],["cuisine","Langage"],["cuisine","Base de données"],["cuisine","Serveur web"],["bat","Hébergement"]];
+const piles={
+ "WordPress":{i:"Un site vitrine sous WordPress. Remarque la case framework : WordPress n'en utilise pas.",
+   v:["Thème WordPress","CSS du thème, parfois Bootstrap","JavaScript, jQuery","WordPress","Aucun",
+      "PHP","MySQL","Apache ou Nginx","OVH, o2switch…"]},
+ "Drupal":{i:"Un site sous Drupal. Cette fois, la case framework est remplie par Symfony.",
+   v:["Thème Drupal (gabarits Twig)","CSS du thème, souvent Bootstrap","JavaScript","Drupal","Outils Symfony",
+      "PHP","MySQL ou PostgreSQL","Apache ou Nginx","OVH, Platform.sh…"]},
+ "Symfony sur mesure":{i:"Une application codée par un développeur. Il n'y a pas de CMS : le développeur construit tout, back-office compris.",
+   v:["Gabarits Twig","Bootstrap ou Tailwind","JavaScript","Aucun","Symfony",
+      "PHP","PostgreSQL","Nginx","Serveur dédié ou cloud"]},
+ "Wix":{i:"Un site Wix. Toute la cuisine est gérée par Wix. Tu ne vois et ne touches que la salle, via un éditeur visuel.",
+   v:["Éditeur visuel Wix","Éditeur visuel Wix","Géré par Wix","Back-office Wix","Invisible pour toi",
+      "Invisible pour toi","Invisible pour toi","Invisible pour toi","Wix"]}
 };
-const tabs=document.getElementById("tabs"), prows=document.getElementById("prows"), pinfo=document.getElementById("pinfo");
-Object.entries(presets).forEach(([k,p])=>{const b=document.createElement("button");b.textContent=p.label;b.dataset.k=k;b.onclick=()=>showP(k);tabs.appendChild(b);});
-function showP(k){const p=presets[k];
-  tabs.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.k===k));
-  prows.innerHTML=layers.map(l=>{const v=p.v[l.id];const absent=v===null;
-    const managed=p.m&&l.id!=="I3"&&v!==null;
-    return `<div class="prow ${absent?"absent":l.z} ${managed?"managed":""}"><span class="code">${l.id}</span><span class="lname">${l.n}</span><span class="val">${absent?"Absente":v}</span></div>`}).join("");
-  pinfo.innerHTML=p.info;}
-showP("drupal");
+const ptabs=document.getElementById("ptabs"),pstack=document.getElementById("pstack"),pintro=document.getElementById("pintro");
+Object.keys(piles).forEach(k=>{const b=document.createElement("button");b.className="ghost";b.textContent=k;b.onclick=()=>showP(k);ptabs.appendChild(b);});
+function showP(k){const p=piles[k];
+  ptabs.querySelectorAll("button").forEach(b=>{const on=b.textContent===k;b.classList.toggle("ghost",!on);});
+  pintro.textContent=p.i;
+  pstack.innerHTML=rows.map((r,i)=>{const v=p.v[i];const none=v==="Aucun";
+    return `<div class="${none?"none":r[0]}"><span class="sl">${r[1]}</span><span class="sv">${none?"Aucun : ce poste n'existe pas ici":v}</span></div>`}).join("");}
+showP("WordPress");
 
-/* ---------- 6. Quiz ---------- */
+/* ---------- Chapitre 9 : quiz ---------- */
+const choices=[["css","🎨 Salle · déco"],["js","⚡ Salle · réactions"],["cms","🏪 Cuisine · CMS"],["fw","🏗️ Cuisine · framework"],["lang","🔤 Cuisine · langage"],["db","🧊 Cuisine · chambre froide"],["web","🛎️ Cuisine · passe"],["bat","🏢 Bâtiment"]];
 const quiz=[
- {t:"Bootstrap",a:"F2",x:"Bootstrap est un framework CSS. Il gère l'apparence : grille, boutons, formulaires. Il ajoute quelques composants JavaScript, mais son rôle principal reste le style."},
- {t:"Symfony",a:"B2",x:"Symfony est un framework back-end écrit en PHP. Il fournit la charpente d'une application côté serveur."},
- {t:"WordPress",a:"B1",x:"WordPress est un CMS : une application finie avec un back-office pour gérer le contenu."},
- {t:"MySQL",a:"B4",x:"MySQL est une base de données. Il stocke les articles, pages et comptes que le CMS lit à chaque visite."},
- {t:"React",a:"F3",x:"React est un framework JavaScript qui s'exécute dans le navigateur. Il construit des interfaces interactives."},
- {t:"PHP",a:"B3",x:"PHP est un langage. WordPress, Drupal et Symfony sont tous écrits en PHP."},
- {t:"Nginx",a:"B5",x:"Nginx est un serveur web. Il reçoit les requêtes des visiteurs et les transmet au bon programme."},
- {t:"Drupal",a:"B1",x:"Drupal est un CMS. Il repose sur Symfony (B2), mais lui-même occupe la couche CMS."},
- {t:"Twig",a:"F1",x:"Twig est un moteur de gabarits. Il produit le HTML des pages Drupal et Symfony. Il s'exécute sur le serveur, mais son rôle est de fabriquer la structure de la page."},
- {t:"Cloudflare",a:"I3",x:"Cloudflare gère le DNS et sert de CDN. Il agit au niveau du réseau, avant même que la requête atteigne ton serveur."},
- {t:"Tailwind",a:"F2",x:"Tailwind est un framework CSS, concurrent de Bootstrap. Il gère uniquement l'apparence."},
- {t:"OVH",a:"I2",x:"OVH est un hébergeur. Il loue les machines sur lesquelles tournent les sites."}
+ {t:"Bootstrap",a:"css",x:"Bootstrap, c'est de la déco prête à poser : du CSS déjà écrit."},
+ {t:"Drupal",a:"cms",x:"Drupal est un restaurant clé en main : un CMS avec back-office. Il est bâti sur des outils Symfony, mais lui-même est un CMS."},
+ {t:"Symfony",a:"fw",x:"Symfony est une cuisine équipée sans chef : un framework. Il faut un développeur pour en faire quelque chose."},
+ {t:"MySQL",a:"db",x:"MySQL est la chambre froide : la base de données où le contenu est rangé."},
+ {t:"PHP",a:"lang",x:"PHP est la langue des recettes de WordPress, Drupal et Symfony."},
+ {t:"React",a:"js",x:"React fait réagir la page dans le navigateur. C'est un framework JavaScript, côté salle."},
+ {t:"WordPress",a:"cms",x:"WordPress est un CMS : tu publies un article le jour même, sans coder."},
+ {t:"Nginx",a:"web",x:"Nginx est un serveur web : il reçoit les commandes au passe et les transmet en cuisine."},
+ {t:"OVH",a:"bat",x:"OVH loue la machine : c'est le bâtiment."},
+ {t:"Tailwind",a:"css",x:"Tailwind est un concurrent de Bootstrap. C'est aussi de la déco : du CSS."}
 ];
-const qChoices=["F1","F2","F3","B1","B2","B3","B4","B5","I2","I3"];
-let qi=0,good=0;
-const qitem=document.getElementById("qitem"),ans=document.getElementById("answers"),fb=document.getElementById("feedback"),qnext=document.getElementById("qnext"),score=document.getElementById("score"),qcount=document.getElementById("qcount");
-function showQ(){const q=quiz[qi];qcount.textContent=`Outil ${qi+1} sur ${quiz.length}`;qitem.textContent=q.t;fb.innerHTML="";qnext.disabled=true;
-  score.textContent=`Score : ${good} / ${qi}`;
-  ans.innerHTML="";qChoices.forEach(c=>{const l=layers.find(x=>x.id===c);const b=document.createElement("button");b.textContent=`${c} · ${l.n}`;b.onclick=()=>answer(b,c);ans.appendChild(b);});}
-function answer(btn,c){const q=quiz[qi];if(!qnext.disabled)return;
-  const ok=c===q.a;if(ok)good++;
-  ans.querySelectorAll("button").forEach(b=>{if(b.textContent.startsWith(q.a))b.classList.add("good");b.disabled=true;b.style.opacity=1;});
+let qi=0,good=0,answered=false;
+function showQ(){answered=false;const q=quiz[qi];
+  score.textContent=`Question ${qi+1} sur ${quiz.length} · ${good} bonne(s) réponse(s)`;
+  qitem.textContent=q.t;feedback.innerHTML="";qnext.disabled=true;
+  answers.innerHTML="";choices.forEach(([id,l])=>{const b=document.createElement("button");b.textContent=l;b.dataset.id=id;b.onclick=()=>pick(b);answers.appendChild(b);});}
+function pick(btn){if(answered)return;answered=true;const q=quiz[qi];const ok=btn.dataset.id===q.a;if(ok)good++;
+  answers.querySelectorAll("button").forEach(b=>{if(b.dataset.id===q.a)b.classList.add("good");});
   if(!ok)btn.classList.add("bad");
-  const l=layers.find(x=>x.id===q.a);
-  fb.innerHTML=`<strong>${ok?"Bonne réponse.":"Pas tout à fait."}</strong> Couche ${q.a} · ${l.n}. ${q.x}`;
-  score.textContent=`Score : ${good} / ${qi+1}`;
-  qnext.disabled=false;qnext.textContent=qi===quiz.length-1?"Recommencer":"Outil suivant";}
+  feedback.innerHTML=`<strong>${ok?"Bien vu.":"Presque."}</strong> ${q.x}`;
+  score.textContent=`Question ${qi+1} sur ${quiz.length} · ${good} bonne(s) réponse(s)`;
+  qnext.disabled=false;qnext.textContent=qi===quiz.length-1?"Recommencer":"Outil suivant →";
+  if(qi===quiz.length-1)feedback.innerHTML+=`<p style="margin-top:8px"><strong>Résultat : ${good} sur ${quiz.length}.</strong></p>`;}
 qnext.onclick=()=>{if(qi===quiz.length-1){qi=0;good=0;}else qi++;showQ();};
 showQ();
 </script>
