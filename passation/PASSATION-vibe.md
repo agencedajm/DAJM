@@ -46,7 +46,7 @@ Vibe propose avant même que le travail commence :
 
 ## 3. Comment une séance commence : le diagnostic d'entrée
 
-Vibe ne suppose rien. Il pose d'abord trois questions :
+Vibe ne suppose rien et n'exige pas qu'Arnaud sache déjà ce qu'il veut. L'entrée principale est une **description libre du projet**, même floue. Si l'idée n'est pas mûre, Vibe oriente vers la phase A (idéation). Il complète avec trois questions, seulement si la description n'y répond pas :
 
 1. Que veux-tu faire : créer un projet, améliorer un existant, ajouter une fonctionnalité, ou auditer ?
 2. Où en est le projet ?
@@ -151,6 +151,17 @@ Chaque direction intervient à plusieurs phases : elle conseille en amont et con
 | Infrastructure | C1, D | D, G | SPF, DKIM, DMARC, DNSSEC, sauvegardes | `checkdmarc`, scripts validés par Arnaud |
 | Qualité du code IA | C3 | E | Bonnes pratiques par langage | Linters, détection des paquets inventés (« slopsquatting ») |
 
+### Objectifs par projet, avec des planchers
+
+Une direction ne vise pas la note maximale par principe. Au cadrage, Vibe propose pour chaque direction un **objectif adapté au projet**, avec sa justification, et Arnaud le valide. Exemple : « EcoIndex C sur les pages principales », acceptable pour un site riche en images ou en vidéos. Les gates vérifient l'objectif fixé, pas la perfection.
+
+Certains objectifs ont toutefois un **plancher non négociable** :
+
+- **Sécurité :** aucune faille de gravité haute ou critique, aucun secret exposé.
+- **Obligations légales :** RGPD, pages légales et accessibilité quand la loi l'impose au client (par exemple, l'European Accessibility Act pour une partie de l'e-commerce).
+
+Un objectif revu à la baisse en cours de projet est consigné avec sa raison dans l'état du projet.
+
 Ce qu'aucun outil ne vérifie automatiquement (sauvegardes réellement restaurables, double authentification des comptes, contrats de maintenance) passe par un questionnaire guidé intégré à la phase concernée.
 
 ### Précisions sur deux directions
@@ -234,7 +245,11 @@ Arnaud exige que Vibe consomme des tokens **en proportion de la demande**. Une p
 2. **Le LLM lit des résumés, pas des sorties brutes.** Python filtre et condense les résultats des outils (par exemple, constats de gravité moyenne et plus, dédoublonnés, en JSON court) avant de les transmettre.
 3. **Activer seulement ce qui sert.** Les directions, skills et serveurs MCP se chargent quand une phase ou un signal les demande. Une définition d'outil chargée inutilement coûte des tokens à chaque échange.
 4. **Proportionnalité par mode.** En mode « fonctionnalité », seules les directions concernées par les fichiers modifiés s'activent, à partir du diff. Un audit complet reste un choix explicite.
-5. **Niveau de profondeur choisi au diagnostic.** Trois niveaux, par exemple « express », « standard » et « expert ». Chaque niveau fixe les directions actives, le modèle utilisé et un budget.
+5. **Profondeur déduite et ajustée, jamais demandée d'entrée.** Arnaud ne choisit pas un niveau au départ : son idée n'est souvent pas mûre à ce stade. Il décrit son projet librement, même de façon floue (« je ne sais pas encore »). Vibe en déduit une profondeur pour chaque direction, l'annonce avec sa raison et une estimation de coût, puis l'ajuste au fil du projet :
+   - **À la hausse** quand un signal apparaît (paiement, données personnelles, chatbot) ou quand l'enjeu grandit.
+   - **À la baisse** quand une direction ne concerne pas le projet.
+   - **Avec des planchers :** certaines étapes gardent une profondeur minimale quel que soit le projet, car une erreur y coûte cher plus tard. Exemples : choix de la stack, modèle de menaces, gestion des secrets.
+   - **De façon visible :** chaque changement de profondeur est annoncé à Arnaud, qui peut le refuser. Pas de dépense silencieuse.
 6. **Le bon modèle pour chaque tâche.** Un petit modèle pour classer, extraire et détecter les signaux. Un modèle intermédiaire pour produire. Le modèle le plus puissant seulement pour l'architecture, le modèle de menaces et les arbitrages difficiles. Le modèle se règle par agent.
 7. **Lire le corpus une seule fois.** Le diagnostic produit une fiche projet condensée, stockée avec l'état. Les agents suivants lisent cette fiche et des extraits ciblés, jamais tout le corpus.
 8. **Un contexte propre par story.** Chaque story démarre dans un contexte neuf, avec son fichier de story comme seule mémoire. Les lectures lourdes passent par des sous-agents qui renvoient une conclusion, pas le contenu lu.
@@ -312,7 +327,7 @@ Demande à Arnaud la conversation « Rigby refonte site » ou ses documents quan
 Arnaud doit trancher ces points, dans l'ordre que tu lui proposeras :
 
 1. Version de BMAD à figer, après l'audit des outils existants.
-2. Reprise du skill Eco-conception, après son audit.
+2. Reprise du skill Eco-conception, après son audit. Le skill doit accepter un objectif de note (par exemple C) et non viser A par défaut.
 3. Premiers packs de stack (suggestion : WordPress, pour Rigby, puis Symfony).
 4. Satellites d'idéation activés par défaut.
 5. Support des validations de gate : fichier signé, commentaire de PR ou interface.
@@ -327,7 +342,7 @@ Arnaud doit trancher ces points, dans l'ordre que tu lui proposeras :
 1. Fais l'inventaire des outils existants (section 9).
 2. Vérifie l'état de BMAD v7 sur le [dépôt BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD).
 3. Fais le point avec Arnaud sur les décisions ouvertes.
-4. Propose l'arborescence du dépôt Vibe et le format de `factory/state.json`, incluant le mode, le niveau de profondeur, les statuts « reconstituée » et « hors périmètre », les signaux, les directions actives et la consommation de tokens.
+4. Propose l'arborescence du dépôt Vibe et le format de `factory/state.json`, incluant le mode, la profondeur et l'objectif de chaque direction, les statuts « reconstituée » et « hors périmètre », les signaux, les directions actives et la consommation de tokens.
 5. Décris le contrat d'une direction et celui d'un pack de stack : ce que chacun doit fournir pour être branché.
 6. Attends la décision d'Arnaud avant d'écrire le moindre code.
 
