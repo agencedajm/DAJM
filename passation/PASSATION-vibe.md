@@ -304,16 +304,18 @@ Procède ainsi :
 
 Pour économiser les tokens, utilise des recherches ciblées et des sous-agents de lecture plutôt que de charger les dossiers entiers dans le contexte.
 
-## 10. Cas de test : Rigby
+## 10. Étude de cas : Rigby
 
-Le projet de refonte du site Rigby sert de premier cas réel :
+Rigby est un **exemple**, pas un prérequis. Le cadrage de Vibe ne dépend pas de ce projet, et ses documents ne sont pas nécessaires pour avancer.
 
-- Site existant sous WordPress. Construction exacte (Gutenberg ou builder) à déterminer.
-- Comptes rendus disponibles.
-- Objectif : une passe d'amélioration du site et des parcours utilisateurs.
-- Parcours attendu : diagnostic d'entrée, analyse de l'existant, phases amont reconstituées, puis UX, UI, infrastructure, construction sur staging, recette, mise en ligne.
+En revanche, Rigby fera une étude de cas idéale pour éprouver et affiner Vibe une fois le noyau construit, parce qu'il réunit les situations les plus exigeantes :
 
-Demande à Arnaud la conversation « Rigby refonte site » ou ses documents quand le cadrage de Vibe sera validé.
+- Site existant sous WordPress, avec une construction à découvrir (Gutenberg ou builder).
+- Corpus déjà riche : comptes rendus, informations client.
+- Objectif d'amélioration du site et des parcours utilisateurs, sans tout reconstruire.
+- Parcours complet à tester : diagnostic d'entrée, analyse de l'existant, phases amont reconstituées, UX, UI, infrastructure, construction sur staging, recette, mise en ligne.
+
+Le moment venu, propose à Arnaud de faire passer Rigby dans Vibe. Les écarts constatés deviendront des améliorations du framework.
 
 ## 11. Acquis de la conversation WEB STACK
 
