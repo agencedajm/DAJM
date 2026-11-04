@@ -16,6 +16,7 @@ Date de passation : 4 novembre 2026.
 - **Ne construis rien tant qu'Arnaud ne l'a pas décidé.** La phase en cours reste une phase de cadrage.
 - Avance pas à pas : une brique validée avant la suivante.
 - Recommande toujours une option principale, argumentée. Arnaud décide.
+- Applique toi-même la sobriété en tokens décrite en section 8 : recherches ciblées, sous-agents pour les lectures lourdes, pas de chargement de dossiers entiers.
 - Pour vérifier une affirmation ou une recherche, utilise le skill `agent-trust-ai`.
 
 ## 1. La vision en une phrase
@@ -142,7 +143,7 @@ Chaque direction intervient à plusieurs phases : elle conseille en amont et con
 | Technique | A2, C1, C2 | C4, E | Bonnes pratiques par stack | Packs de stack |
 | Cybersécurité | B1, C2 | E, F, H | OWASP ASVS, OWASP Top 10, OWASP Top 10 for LLM | Semgrep, gitleaks, OSV, ZAP, testssl.sh, Mozilla HTTP Observatory |
 | Accessibilité | B3 | E, F | RGAA 4.1.2, WCAG 2.2, European Accessibility Act | axe-core, Pa11y, Lighthouse |
-| Écoconception | B3, C1 | F | RGESN 2024, EcoIndex | `ecoindex-cli`, GreenIT-Analysis |
+| Écoconception | B3, C1 | F | RGESN 2024, EcoIndex | Skill Eco-conception existant d'Arnaud (à vérifier, voir section 9), `ecoindex-cli`, GreenIT-Analysis |
 | Performance | C1 | F | Core Web Vitals | Lighthouse, PageSpeed Insights API |
 | SEO | A2, B2 | F, G, H | Recommandations Google, schema.org | Search Console API, source de mots-clés à choisir |
 | Conformité légale | A4, B1 | F | RGPD, CNIL, Code de la consommation | Détection des traceurs avant consentement (Playwright) |
@@ -223,7 +224,31 @@ Règles :
 
 L'exemple de hook de périmètre en Python figure dans `passation/PASSATION-tool-factory.md`.
 
-## 8. BMAD
+## 8. Sobriété en tokens
+
+Arnaud exige que Vibe consomme des tokens **en proportion de la demande**. Une petite fonctionnalité ne déclenche pas tout l'arsenal. Ce principe est une exigence d'architecture, au même titre que la sécurité.
+
+### Principes
+
+1. **Le déterministe d'abord.** Python, les scanners et les scripts font tout ce qui peut se faire sans LLM : détection de stack, collecte, mesures, contrôles, mise en forme des rapports. Le LLM intervient seulement pour le jugement, la rédaction et la décision.
+2. **Le LLM lit des résumés, pas des sorties brutes.** Python filtre et condense les résultats des outils (par exemple, constats de gravité moyenne et plus, dédoublonnés, en JSON court) avant de les transmettre.
+3. **Activer seulement ce qui sert.** Les directions, skills et serveurs MCP se chargent quand une phase ou un signal les demande. Une définition d'outil chargée inutilement coûte des tokens à chaque échange.
+4. **Proportionnalité par mode.** En mode « fonctionnalité », seules les directions concernées par les fichiers modifiés s'activent, à partir du diff. Un audit complet reste un choix explicite.
+5. **Niveau de profondeur choisi au diagnostic.** Trois niveaux, par exemple « express », « standard » et « expert ». Chaque niveau fixe les directions actives, le modèle utilisé et un budget.
+6. **Le bon modèle pour chaque tâche.** Un petit modèle pour classer, extraire et détecter les signaux. Un modèle intermédiaire pour produire. Le modèle le plus puissant seulement pour l'architecture, le modèle de menaces et les arbitrages difficiles. Le modèle se règle par agent.
+7. **Lire le corpus une seule fois.** Le diagnostic produit une fiche projet condensée, stockée avec l'état. Les agents suivants lisent cette fiche et des extraits ciblés, jamais tout le corpus.
+8. **Un contexte propre par story.** Chaque story démarre dans un contexte neuf, avec son fichier de story comme seule mémoire. Les lectures lourdes passent par des sous-agents qui renvoient une conclusion, pas le contenu lu.
+9. **Profiter du cache de prompt.** Les instructions stables (règles du projet, référentiel) forment un préfixe court et identique d'un appel à l'autre. Le fichier `CLAUDE.md` reste bref. Le détail vit dans des skills chargés à la demande.
+10. **Ne pas refaire ce qui n'a pas changé.** Les résultats de contrôle sont mis en cache par empreinte de fichier. Un nouvel audit ne relance que ce qui a bougé.
+11. **Limiter le parallélisme.** Pas de lancement d'agents en nombre sans justification. L'orchestrateur fixe un plafond par phase.
+
+### Mesure et budgets
+
+- L'orchestrateur enregistre la consommation de chaque étape dans l'état du projet. Les exécutions de Claude Code sans interface (`claude -p` avec sortie JSON) renvoient l'usage et le coût.
+- Chaque mode et chaque niveau de profondeur ont un budget. Au-delà, l'orchestrateur prévient Arnaud et demande s'il faut continuer.
+- Les budgets chiffrés seront fixés après les premiers essais réels. Aucun chiffre n'est inventé avant mesure.
+
+## 9. BMAD
 
 ### Décisions prises
 
@@ -240,21 +265,31 @@ L'exemple de hook de périmètre en Python figure dans `passation/PASSATION-tool
 
 Recommandation : prendre la v7 si elle est sortie en stable au lancement. Sinon, prototyper sur la v6.12 figée.
 
-### Tâche : faire le point sur le BMAD local d'Arnaud
+### Tâche : inventaire des outils existants d'Arnaud
 
-Arnaud possède une installation BMAD ancienne, qu'il a beaucoup modifiée. Avant toute décision de version, fais-en l'inventaire :
+Arnaud a déjà construit des outils, rangés dans le dossier `DAJM/CODE`. Les réutiliser évite de refaire un travail déjà fait. Ils datent toutefois d'un moment et doivent être vérifiés. Deux éléments sont connus :
 
-1. **Ne modifie rien dans ce dossier.** Lecture seule.
-2. Identifie la version installée (manifeste d'installation, `package.json`, fichiers de configuration comme `core-config.yaml`).
-3. Compare avec la version d'origine correspondante sur GitHub pour isoler les modifications d'Arnaud.
-4. Classe chaque modification :
-   - **À reprendre :** idée ou contenu utile à porter dans le module DAJM.
-   - **Couvert par la version récente :** BMAD fait déjà mieux.
-   - **À abandonner :** obsolète ou incompatible.
+- **Une installation BMAD ancienne**, beaucoup modifiée par Arnaud, à la racine de `DAJM/CODE`.
+- **Un skill Eco-conception**, à la racine de `DAJM/CODE`, à côté de BMAD.
+
+Procède ainsi :
+
+1. **Ne modifie rien dans `DAJM/CODE`.** Lecture seule.
+2. Liste rapidement les autres outils présents dans `DAJM/CODE`, sans les lire en entier. Signale ceux qui semblent utiles à Vibe et demande à Arnaud lesquels examiner.
+3. **BMAD local :**
+   1. Identifie la version installée (manifeste d'installation, `package.json`, fichiers de configuration comme `core-config.yaml`).
+   2. Compare avec la version d'origine correspondante sur GitHub pour isoler les modifications d'Arnaud.
+   3. Classe chaque modification : **à reprendre** dans le module DAJM, **couverte** par la version récente, ou **à abandonner**.
+4. **Skill Eco-conception :**
+   1. Vérifie son contenu par rapport aux référentiels actuels : RGESN 2024 et méthode de calcul EcoIndex en vigueur.
+   2. Signale les critères manquants, obsolètes ou inexacts, en citant la source officielle.
+   3. Indique s'il peut devenir la direction Écoconception de Vibe tel quel, après mise à jour, ou s'il vaut mieux repartir de zéro.
 5. Signale tout secret, clé ou donnée client trouvé, sans en recopier la valeur.
-6. Rends un fichier `bmad-local-audit.md` avec ce classement et une recommandation de migration.
+6. Rends un fichier `audit-outils-existants.md` avec ce classement et une recommandation de reprise pour chaque outil.
 
-## 9. Cas de test : Rigby
+Pour économiser les tokens, utilise des recherches ciblées et des sous-agents de lecture plutôt que de charger les dossiers entiers dans le contexte.
+
+## 10. Cas de test : Rigby
 
 Le projet de refonte du site Rigby sert de premier cas réel :
 
@@ -265,39 +300,40 @@ Le projet de refonte du site Rigby sert de premier cas réel :
 
 Demande à Arnaud la conversation « Rigby refonte site » ou ses documents quand le cadrage de Vibe sera validé.
 
-## 10. Acquis de la conversation WEB STACK
+## 11. Acquis de la conversation WEB STACK
 
 À garder en tête, sans y passer du temps :
 
 - Un guide pédagogique « couches d'un site web » existe : `guides/couches-web.html` (dépôt `agencedajm/DAJM`, branche `claude/guide-couches-web`). Correction à faire : Node.js est un environnement d'exécution, pas un langage.
 - La checklist sécurité d'Arnaud a été analysée. Ses manques sont repris dans les directions : injection SQL, XSS, CSRF, en-têtes, cookies, secrets déjà commités, surveillance, plan d'incident, gestion des accès de l'agence, SPF/DKIM/DMARC, accessibilité, RGPD opérationnel. Le mode debug est coupé en production. On ne désactive jamais un WAF pour faire passer du code généré.
 
-## 11. Décisions ouvertes
+## 12. Décisions ouvertes
 
 Arnaud doit trancher ces points, dans l'ordre que tu lui proposeras :
 
-1. Version de BMAD à figer, après l'audit du BMAD local.
-2. Premiers packs de stack (suggestion : WordPress, pour Rigby, puis Symfony).
-3. Satellites d'idéation activés par défaut.
-4. Support des validations de gate : fichier signé, commentaire de PR ou interface.
-5. Mode d'utilisation : ligne de commande seule, ou avec une interface simple.
-6. Où tourne Vibe : ordinateur d'Arnaud (système ?), cloud, GitHub Actions.
-7. Usage interne seulement, ou aussi prestation vendue aux clients.
-8. Budget mensuel pour les API d'IA et les données SEO.
-9. Outil de wireframes : Figma, HTML ou autre.
+1. Version de BMAD à figer, après l'audit des outils existants.
+2. Reprise du skill Eco-conception, après son audit.
+3. Premiers packs de stack (suggestion : WordPress, pour Rigby, puis Symfony).
+4. Satellites d'idéation activés par défaut.
+5. Support des validations de gate : fichier signé, commentaire de PR ou interface.
+6. Mode d'utilisation : ligne de commande seule, ou avec une interface simple.
+7. Où tourne Vibe : ordinateur d'Arnaud (système ?), cloud, GitHub Actions.
+8. Usage interne seulement, ou aussi prestation vendue aux clients.
+9. Budget mensuel pour les API d'IA et les données SEO.
+10. Outil de wireframes : Figma, HTML ou autre.
 
-## 12. Prochaines étapes
+## 13. Prochaines étapes
 
-1. Fais l'audit du BMAD local (section 8).
+1. Fais l'inventaire des outils existants (section 9).
 2. Vérifie l'état de BMAD v7 sur le [dépôt BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD).
 3. Fais le point avec Arnaud sur les décisions ouvertes.
-4. Propose l'arborescence du dépôt Vibe et le format de `factory/state.json`, incluant le mode, les statuts « reconstituée » et « hors périmètre », les signaux et les directions actives.
+4. Propose l'arborescence du dépôt Vibe et le format de `factory/state.json`, incluant le mode, le niveau de profondeur, les statuts « reconstituée » et « hors périmètre », les signaux, les directions actives et la consommation de tokens.
 5. Décris le contrat d'une direction et celui d'un pack de stack : ce que chacun doit fournir pour être branché.
 6. Attends la décision d'Arnaud avant d'écrire le moindre code.
 
-## 13. Prompt de démarrage suggéré
+## 14. Prompt de démarrage suggéré
 
-> Je reprends la conception de Vibe, mon framework de création web basé sur BMAD. Lis `passation/PASSATION-vibe.md` en entier. Commence par l'audit de mon BMAD local, en lecture seule, comme décrit en section 8. Ne construis rien : rends-moi l'audit, puis fais le point sur les décisions ouvertes.
+> Je reprends la conception de Vibe, mon framework de création web basé sur BMAD. Lis `passation/PASSATION-vibe.md` en entier. Commence par l'inventaire de mes outils existants dans `DAJM/CODE` (BMAD local et skill Eco-conception), en lecture seule, comme décrit en section 9. Ne construis rien : rends-moi l'audit, puis fais le point sur les décisions ouvertes.
 
 ## Sources
 
