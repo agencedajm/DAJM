@@ -62,10 +62,21 @@ Arnaud a fourni une checklist de sécurité et la transcription d'une vidéo sur
 
 ### Reformulation
 
-Le projet est un **compagnon de création web multi-agents** qui accompagne un projet client de la demande initiale à la maintenance. Il a deux faces :
+Le projet est un **compagnon de création web multi-agents** qui accompagne un projet client de la demande initiale à la maintenance. Il a trois faces :
+
+- **Conseiller :** il propose une direction technique avant que le travail commence (voir « Posture » ci-après).
 
 - **Produire :** brief, stratégie SEO, arborescence, wireframes, spécifications, choix techniques, infrastructure, code (CMS ou framework), contenus, documentation.
 - **Contrôler :** à chaque étape, des contrôles de qualité (« gates ») vérifient la sécurité, l'accessibilité, l'écoconception, la performance, le SEO, la conformité légale et la qualité du code.
+
+### Posture : un directeur technique proactif
+
+Le compagnon n'attend pas qu'on lui demande. Il **propose avant même que le travail commence**, comme le ferait un directeur technique :
+
+- Dès la réception de la demande client, il propose une direction : type de site, stack (CMS ou framework), hébergement, budget technique, risques, obligations légales probables.
+- À chaque phase, il annonce ce qui vient ensuite, ce qu'il recommande et pourquoi, avec les options écartées.
+- Quand il repère un signal (paiement, chatbot, données personnelles), il alerte et propose les mesures avant que le problème apparaisse.
+- Il recommande toujours une option principale, argumentée. Arnaud garde la décision finale.
 
 Un **orchestrateur Python** pilote le tout. Il garantit qu'aucune étape obligatoire n'est oubliée. Il active les agents selon la phase du projet et selon des signaux détectés dans le projet.
 
@@ -163,14 +174,35 @@ Oui, il faut l'intégrer, de deux façons :
 
 ## 7. Méthode BMAD
 
-Arnaud mentionne la méthode BMAD. C'est un framework open source de développement assisté par IA, organisé en agents spécialisés (analyste, chef de produit, architecte, UX, scrum master, développeur, QA) et en documents successifs (brief, PRD, architecture, stories).
+Arnaud mentionne la méthode BMAD. C'est un framework open source de développement assisté par IA, organisé en agents spécialisés (analyste, chef de produit, architecte, UX, développeur, QA) et en documents successifs (brief, PRD, architecture, stories).
 
-À décider en phase de cadrage :
+### État constaté le 4 novembre 2026 (dépôt `bmad-code-org/BMAD-METHOD`)
 
-- Utiliser BMAD tel quel comme moteur de production, et ajouter par-dessus l'orchestrateur Python et les gates de contrôle.
-- Ou reprendre ses rôles et ses modèles de documents dans une architecture propre.
+- **Licence :** MIT.
+- **Versions :** v6.12 stable (gelée, corrections de bugs seulement). V7 en alpha, sortie annoncée vers mi-novembre 2026.
+- **Format V7 :** des skills, avec un plugin Claude Code (`/plugin marketplace add bmad-code-org/bmad-plugins`).
+- **Modules officiels :** BMad Method, BMad Builder (création d'agents, de skills et de workflows), Creative Intelligence Suite, Test Architect, BMad Loop, Game Dev Studio.
+- **Orchestration :** les workflows sont suivis par le LLM dans l'outil de code. Pas d'orchestrateur programmatique externe documenté.
 
-À vérifier : la version actuelle, la licence, le format des agents et leur compatibilité avec Claude Code.
+### Recommandation : architecture hybride
+
+Utiliser BMAD pour **produire**, et l'orchestrateur Python pour **garantir** :
+
+| Couche | Rôle | Qui la porte |
+|---|---|---|
+| Production et dialogue | Agents, ateliers, modèles de documents (brief, PRD, architecture, stories) | BMAD, plus un module DAJM créé avec BMad Builder (SEO, conformité, accessibilité, écoconception, sécurité, développeurs WordPress et Drupal) |
+| Garantie | Machine à états, étapes obligatoires, gates, référentiel, contrôles outillés, rapports | Orchestrateur Python propre à DAJM |
+
+Raisons :
+
+- BMAD apporte gratuitement des rôles et des modèles éprouvés. Les réécrire coûterait des semaines.
+- BMAD seul ne garantit pas qu'une étape n'est pas sautée, puisque le LLM suit les workflows. C'est précisément l'exigence d'Arnaud, d'où la couche Python.
+- Le noyau Python ne doit dépendre que des **documents produits** par BMAD (fichiers Markdown), pas de ses mécanismes internes. Si BMAD change ou disparaît, seule la couche de production est à remplacer.
+
+Précautions :
+
+- V7 est en alpha. Figer la version utilisée et attendre la version stable avant un usage client.
+- Commencer par un essai court (une à deux journées) : installer V7, faire passer un faux projet client, noter ce qui manque.
 
 ## 8. Architecture technique proposée (à valider)
 
@@ -192,7 +224,7 @@ Le format commun d'un constat contient au minimum : identifiant de règle, axe, 
 
 | Étape | Contenu | Livrable |
 |---|---|---|
-| 0. Cadrage | Réponses aux questions de la section 10, décision sur BMAD, fusion avec la conversation TOOL FACTORY | Périmètre validé |
+| 0. Cadrage | Réponses aux questions de la section 10, fusion avec la conversation TOOL FACTORY, essai de BMAD V7 sur un faux projet | Périmètre validé, décision BMAD confirmée |
 | 1. Recherche | Agents en parallèle, un par axe (voir la section 9.1), puis vérification avec `agent-trust-ai` | Référentiel sourcé |
 | 2. Noyau | Orchestrateur Python, format des constats, sauvegarde de l'état, rapport vide, tests | Un projet fictif traverse toutes les phases |
 | 3. Premier parcours | Un type de projet de bout en bout, par exemple un site vitrine WordPress | Premier projet réel accompagné |
@@ -223,7 +255,7 @@ Chaque agent rend un fichier de référentiel avec : liste des critères, source
 3. **Exécution :** sur ton ordinateur (Mac ou Windows), dans le cloud ou dans GitHub Actions ?
 4. **Dépôt :** créer un dépôt dédié, par exemple `agencedajm/web-factory`.
 5. **Budget :** budget mensuel acceptable pour les API d'IA et les données SEO.
-6. **BMAD :** l'utiliser tel quel ou s'en inspirer ?
+6. **BMAD :** valider l'architecture hybride recommandée en section 7.
 7. **Wireframes :** dans quel outil (Figma, HTML, autre) ?
 
 ## 11. Conversation TOOL FACTORY
