@@ -180,7 +180,7 @@ Pour la conversation qui reprend, procède dans cet ordre :
 
 ## Prompt de démarrage suggéré
 
-> Je reprends un travail de réflexion sur une factory de création d'outils web sécurisés, basée sur BMAD. La passation est dans `PASSATION-FACTORY.md`. Lis-la en entier, puis lis la passation de la conversation « WEB STACK » que je te fournis. Ne construis rien pour l'instant : fais-moi d'abord le point sur les décisions ouvertes et sur la façon d'articuler la factory et le compagnon de création web.
+> Je reprends un travail de réflexion sur une factory de création d'outils web sécurisés, basée sur BMAD. La passation est dans `passation/PASSATION-tool-factory.md`. Lis-la en entier, puis lis la passation de la conversation « WEB STACK » que je te fournis. Ne construis rien pour l'instant : fais-moi d'abord le point sur les décisions ouvertes et sur la façon d'articuler la factory et le compagnon de création web.
 
 ## Sources
 
